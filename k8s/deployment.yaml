@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-backend
+  template:
+    metadata:
+      labels:
+        app: youtube-backend
+    spec:
+      containers:
+      - name: backend
+        image: DOCKERHUB_USER_NAME/yt-backend:latest 
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          # t3.micro (1GB RAM)
+          limits:
+            memory: "512Mi"
+            cpu: "800m"
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
