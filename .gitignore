@@ -20,7 +20,6 @@ backend/.classpath
 backend/.project
 !backend/.mvn/wrapper/maven-wrapper.properties
 
-# Java crash logs
 hs_err_pid*
 replay_pid*
 
