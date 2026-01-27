@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "environment" {
-  description = "Ortam name (dev, prod, staging)"
+  description = "Enviroment name (dev, prod, staging)"
   type        = string
   default     = "dev"
 }
