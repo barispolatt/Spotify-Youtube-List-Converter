@@ -3,8 +3,8 @@ import axios from 'axios';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, Button, TextField, Typography, Paper, Link } from '@mui/material';
 
-const LAMBDA_URL = "WILL_BE_ADDED"; 
-const BACKEND_URL = "http://EC2_PUBLIC_IP:30080/api/v1/youtube/search";
+const LAMBDA_URL = import.meta.env.VITE_LAMBDA_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 function App() {
   const [url, setUrl] = useState('');
@@ -14,7 +14,7 @@ function App() {
 
   const handleConvert = async () => {
     if (!url.includes('spotify.com')) return alert('Invalid Spotify Link');
-    
+
     setLoading(true);
     setStatus('Analyzing Spotify list...');
     setRows([]);
@@ -49,9 +49,9 @@ function App() {
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'trackName', headerName: 'Şarkı Adı', width: 300 },
-    { 
-      field: 'youtubeLink', 
-      headerName: 'YouTube Music Linki', 
+    {
+      field: 'youtubeLink',
+      headerName: 'YouTube Music Linki',
       width: 400,
       renderCell: (params) => (
         <Link href={params.value} target="_blank" rel="noopener" underline="hover">
@@ -64,18 +64,18 @@ function App() {
   return (
     <Box sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', bgcolor: '#f0f2f5' }}>
       <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>Spotify ➡️ YouTube Music</Typography>
-      
+
       <Paper sx={{ p: 3, width: '100%', maxWidth: 800, mb: 3, display: 'flex', gap: 2 }}>
-        <TextField 
-          fullWidth 
-          label="Spotify Playlist Linki" 
-          variant="outlined" 
+        <TextField
+          fullWidth
+          label="Spotify Playlist Linki"
+          variant="outlined"
           size="small"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           color="error"
           onClick={handleConvert}
           disabled={loading}
@@ -87,9 +87,9 @@ function App() {
       <Typography sx={{ mb: 2, color: 'text.secondary' }}>{status}</Typography>
 
       <Paper sx={{ height: 500, width: '100%', maxWidth: 800 }}>
-        <DataGrid 
-          rows={rows} 
-          columns={columns} 
+        <DataGrid
+          rows={rows}
+          columns={columns}
           pageSizeOptions={[10, 25]}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
         />

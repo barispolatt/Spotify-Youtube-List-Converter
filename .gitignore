@@ -64,3 +64,9 @@ k8s/secrets/
 k8s/*-secret.yaml
 
 *.tar
+
+# SSH Keys
+*.pem
+*.pub
+converter-project-key
+converter-project-key.pub

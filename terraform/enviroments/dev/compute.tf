@@ -17,7 +17,7 @@ data "aws_ami" "ubuntu" {
 # Generating SSH key (if there is not)
 resource "aws_key_pair" "deployer" {
   key_name   = var.key_name
-  public_key = file("~/.ssh/id_rsa.pub") # Public key route
+  public_key = file("~/.ssh/id_ed25519.pub") # Using standard local ley
 }
 
 # EC2 
