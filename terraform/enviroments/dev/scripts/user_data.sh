@@ -11,7 +11,7 @@ apt-get install -y curl wget unzip ruby-full
 
 # SWAP Configuration
 # 1GB RAM is not enough, so we have to use 2GB of disk as RAM
-echo "Swap alanı oluşturuluyor..."
+echo "Swap field is creating..."
 fallocate -l 2G /swapfile
 chmod 600 /swapfile
 mkswap /swapfile
