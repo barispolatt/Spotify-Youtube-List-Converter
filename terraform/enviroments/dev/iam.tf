@@ -1,34 +1,48 @@
-# EC2's IAM Role
+# EC2 Role
 resource "aws_iam_role" "ec2_role" {
-  name = "${var.environment}-ec2-role"
+  name = "converter_ec2_role"
 
-  # DÜZELTME: Statement bloğu dolduruldu
+  # EC2 assume role policy
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement =
   })
 }
 
-# CodeDeploy Policy
-resource "aws_iam_role_policy_attachment" "codedeploy_policy" {
+resource "aws_iam_role_policy_attachment" "codedeploy" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCodeDeploy"
 }
 
-# S3 Access Policy for CodeDeploy Artifactleri
-resource "aws_iam_role_policy_attachment" "s3_read_policy" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
-}
-
-# SSM access Policy to read API Keys
-resource "aws_iam_role_policy_attachment" "ssm_read_policy" {
+# SSM 
+resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# Instance Profile
+# S3 Read
+resource "aws_iam_role_policy_attachment" "s3_read" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "${var.environment}-ec2-profile"
+  name = "converter_ec2_profile"
   role = aws_iam_role.ec2_role.name
+}
+
+# Lambda Role
+resource "aws_iam_role" "lambda_role" {
+  name = "converter_lambda_role"
+
+  # Lambda assume role policy
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement =
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
