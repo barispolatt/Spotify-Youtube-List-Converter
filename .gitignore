@@ -46,22 +46,19 @@ lambda/*.spec
 
 lambda/*.zip
 
-terraform/.terraform/
-
-terraform/*.tfstate
-terraform/*.tfstate.backup
-
-terraform/*.tfvars
-terraform/*.tfvars.json
-
-terraform/crash.log
-terraform/override.tf
-terraform/override.tf.json
-terraform/*_override.tf
-terraform/*_override.tf.json
-
-terraform/.terraformrc
-terraform/terraform.rc
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+*.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 
 k8s/secrets/
 k8s/*-secret.yaml

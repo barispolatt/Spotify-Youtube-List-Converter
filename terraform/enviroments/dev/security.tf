@@ -4,13 +4,12 @@ resource "aws_security_group" "k3s_sg" {
   vpc_id      = aws_vpc.main.id
 
   # SSH Access (Admin-only)
-  # Will be updated with my IP'nizi in prod (MyIP/32).
   ingress {
     description = "SSH Access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] 
+    cidr_blocks = [var.my_ip] 
   }
 
   # HTTP Access
@@ -32,13 +31,12 @@ resource "aws_security_group" "k3s_sg" {
   }
 
   # Kubernetes API Access (for kubectl command)
-  # This port is admin-only
   ingress {
     description = "K3s API Server"
     from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
 
   # NodePort Services

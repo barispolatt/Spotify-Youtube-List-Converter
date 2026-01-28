@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-frontend
+  template:
+    metadata:
+      labels:
+        app: youtube-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: AWS_ACCOUNT_ID.dkr.ecr.US_EAST_1.amazonaws.com/spotify-youtube-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+          requests:
+            memory: "128Mi"
+            cpu: "100m"

@@ -33,3 +33,8 @@ variable "key_name" {
   type        = string
   default     = "converter-project-key"
 }
+
+variable "my_ip" {
+  description = "Your personal IP address for SSH/API access (CIDR format, e.g. 1.2.3.4/32)"
+  type        = string
+}

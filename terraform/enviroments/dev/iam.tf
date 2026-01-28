@@ -5,7 +5,15 @@ resource "aws_iam_role" "ec2_role" {
   # EC2 assume role policy
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement =
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
   })
 }
 
@@ -38,7 +46,15 @@ resource "aws_iam_role" "lambda_role" {
   # Lambda assume role policy
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement =
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
   })
 }
 
