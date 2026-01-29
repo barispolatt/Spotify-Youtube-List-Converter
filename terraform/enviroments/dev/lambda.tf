@@ -36,3 +36,12 @@ resource "aws_lambda_function_url" "url" {
     max_age           = 86400
   }
 }
+
+# Allow Public Access to Function URL
+resource "aws_lambda_permission" "url_public" {
+  statement_id  = "AllowPublicUrl"
+  action        = "lambda:InvokeFunctionUrl"
+  function_name = aws_lambda_function.spotify_service.function_name
+  principal     = "*"
+  function_url_auth_type = "NONE"
+}
