@@ -70,3 +70,5 @@ k8s/*-secret.yaml
 *.pub
 converter-project-key
 converter-project-key.pub
+LEARNINGS.md
+project_comprehensive_guide.md
