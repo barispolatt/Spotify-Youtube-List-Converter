@@ -26,7 +26,7 @@ echo 'vm.swappiness=20' >> /etc/sysctl.conf
 echo "CodeDeploy Agent installing..."
 cd /home/ubuntu
 wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
-chmod +x./install
+chmod +x ./install
 ./install auto
 service codedeploy-agent start
 

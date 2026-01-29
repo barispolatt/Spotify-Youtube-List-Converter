@@ -76,7 +76,8 @@ jobs:
 
           # 2. Update Image URL in manifest (Replace placeholder with actual URL)
           # We use sed to replace the placeholder line with the real image path
-          sed -i "s|image: .*spotify-youtube-backend:.*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" /home/ubuntu/spotify-project/k8s/deployment.yaml
+          sed -i "s|image: AWS_ACCOUNT_ID.*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" /home/ubuntu/spotify-project/k8s/deployment.yaml
+          cat /home/ubuntu/spotify-project/k8s/deployment.yaml # Debug: Show updated file
 
           # 3. Apply Kubernetes Manifests
           sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/
