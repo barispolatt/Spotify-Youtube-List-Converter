@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+import jakarta.annotation.PreDestroy;
 
 @SpringBootApplication
 @RestController
@@ -23,6 +24,11 @@ public class BackendApplication {
     // Creating thread pool for better performance
     private final ExecutorService executor = Executors.newFixedThreadPool(5);
 
+    @PreDestroy
+    public void cleanup() {
+        executor.shutdown();
+    }
+
     @PostMapping("/search")
     public List<SearchResult> searchTracks(@RequestBody List<String> queries) {
         // Start an asynchronus search for every track name
@@ -34,6 +40,11 @@ public class BackendApplication {
         return futures.stream()
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
     }
 
     private SearchResult findUrl(String query) {
@@ -62,7 +73,7 @@ public class BackendApplication {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new SearchResult(query, "Not founded");
+        return new SearchResult(query, "Not found");
     }
 
     // DTO
