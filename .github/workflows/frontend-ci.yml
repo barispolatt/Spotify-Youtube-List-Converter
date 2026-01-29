@@ -44,6 +44,10 @@ jobs:
           -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Prepare Kubernetes Manifests (Replace Placeholder Locally)
+        cd ..
+        sed -i "s|REPLACE_ME_IMAGE_URL|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/frontend-deployment.yaml
 
     - name: Copy k8s files to EC2
       uses: appleboy/scp-action@master
@@ -56,19 +60,13 @@ jobs:
 
     - name: Deploy to EC2 (K3s)
       uses: appleboy/ssh-action@master
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY
         script: |
-          # 1. Update Image URL in manifest 
-          sed -i "s|REPLACE_ME_IMAGE_URL|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
-          cat /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml # Debug: Show updated file
-
+          # 1. Update Image URL in manifest (Already done locally)
+          
           # 2. Apply Kubernetes Manifests
           sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
           sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-service.yaml
