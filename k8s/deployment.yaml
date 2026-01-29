@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: AWS_ACCOUNT_ID.dkr.ecr.US_EAST_1.amazonaws.com/spotify-youtube-backend:latest
+        image: REPLACE_ME_IMAGE_URL
         imagePullPolicy: Always
         env:
           - name: SPOTIFY_CLIENT_ID

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: AWS_ACCOUNT_ID.dkr.ecr.US_EAST_1.amazonaws.com/spotify-youtube-frontend:latest
+        image: REPLACE_ME_IMAGE_URL
         imagePullPolicy: Always
         ports:
         - containerPort: 80
