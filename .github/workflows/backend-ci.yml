@@ -68,18 +68,18 @@ jobs:
         envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY
         script: |
           # 1. Update Secrets
-          kubectl create secret generic backend-secrets \
+          sudo k3s kubectl create secret generic backend-secrets \
             --from-literal=SPOTIFY_CLIENT_ID='${{ secrets.SPOTIFY_CLIENT_ID }}' \
             --from-literal=SPOTIFY_CLIENT_SECRET='${{ secrets.SPOTIFY_CLIENT_SECRET }}' \
             --from-literal=YOUTUBE_API_KEY='${{ secrets.YOUTUBE_API_KEY }}' \
-            --dry-run=client -o yaml | kubectl apply -f -
+            --dry-run=client -o yaml | sudo k3s kubectl apply -f -
 
           # 2. Update Image URL in manifest (Replace placeholder with actual URL)
           # We use sed to replace the placeholder line with the real image path
           sed -i "s|image: .*spotify-youtube-backend:.*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" /home/ubuntu/spotify-project/k8s/deployment.yaml
 
           # 3. Apply Kubernetes Manifests
-          kubectl apply -f /home/ubuntu/spotify-project/k8s/
+          sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/
 
           # 4. Force Restart
-          kubectl rollout restart deployment youtube-backend
+          sudo k3s kubectl rollout restart deployment youtube-backend

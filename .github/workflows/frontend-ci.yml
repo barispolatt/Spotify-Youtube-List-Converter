@@ -69,8 +69,8 @@ jobs:
           sed -i "s|image: .*spotify-youtube-frontend:.*|image: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
 
           # 2. Apply Kubernetes Manifests
-          kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
-          kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-service.yaml
+          sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
+          sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-service.yaml
 
           # 3. Force Restart
-          kubectl rollout restart deployment youtube-frontend
+          sudo k3s kubectl rollout restart deployment youtube-frontend
