@@ -9,8 +9,10 @@ def get_token():
     client_id = os.environ.get('SPOTIFY_CLIENT_ID')
     client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET')
     
-    if not client_id or not client_secret:
-        raise Exception("Spotify API keys missing!")
+    # MOCK MODE: Return None if keys are missing or default
+    if not client_id or not client_secret or client_id == "CHANGE_ME":
+        print("MOCK MODE: No valid Spotify keys found.")
+        return None
 
     auth = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
     
@@ -31,25 +33,35 @@ def handler(event, context):
         if not playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'URL is missing!'})}
 
-        # Get ID from URL
-        playlist_id = playlist_url.split('/')[-1].split('?')[0]
+        # Get Token (or None for Mock)
         token = get_token()
         
-        # Pull playlist songs (Limit 50 tracks)
-        req = urllib.request.Request(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit=50&fields=items(track(name,artists(name)))",
-            headers={'Authorization': f'Bearer {token}'}
-        )
-        
-        tracks = []
-        with urllib.request.urlopen(req) as res:
-            data = json.load(res)
-            for item in data['items']:
-                if item.get('track'):
-                    track = item['track']
-                    artist_name = track['artists'][0]['name'] if track['artists'] else "Unknown"
-                    # Add to list in "Artist - Track Name" format
-                    tracks.append(f"{artist_name} - {track['name']}")
+        if token:
+            # REAL MODE: Pull playlist songs from Spotify
+            playlist_id = playlist_url.split('/')[-1].split('?')[0]
+            req = urllib.request.Request(
+                f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit=50&fields=items(track(name,artists(name)))",
+                headers={'Authorization': f'Bearer {token}'}
+            )
+            
+            tracks = []
+            with urllib.request.urlopen(req) as res:
+                data = json.load(res)
+                for item in data['items']:
+                    if item.get('track'):
+                        track = item['track']
+                        artist_name = track['artists'][0]['name'] if track['artists'] else "Unknown"
+                        tracks.append(f"{artist_name} - {track['name']}")
+        else:
+            # MOCK MODE: Return static data
+            print("RETURNING MOCK DATA")
+            tracks = [
+                "Linkin Park - Numb",
+                "Queen - Bohemian Rhapsody",
+                "Daft Punk - Get Lucky",
+                "The Weeknd - Blinding Lights",
+                "Imagine Dragons - Believer"
+            ]
                 
         return {
             'statusCode': 200,
