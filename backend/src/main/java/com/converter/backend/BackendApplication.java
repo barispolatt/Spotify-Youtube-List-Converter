@@ -38,8 +38,8 @@ public class BackendApplication {
         return new CorsFilter(source);
     }
 
-    // Creating thread pool for better performance
-    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    // Creating thread pool - limited to 2 to prevent OOM on small instances
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
     @PreDestroy
     public void cleanup() {
