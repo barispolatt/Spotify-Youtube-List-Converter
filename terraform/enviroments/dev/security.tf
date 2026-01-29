@@ -3,19 +3,15 @@ resource "aws_security_group" "k3s_sg" {
   description = "K3s Node Security Group"
   vpc_id      = aws_vpc.main.id
 
-  # SSH Access (Admin + GitHub Actions only)
+  # SSH Access
+  # NOTE: Open to all for GitHub Actions compatibility (uses dynamic IPs)
+  # TODO: For production, use AWS SSM Session Manager instead of SSH
   ingress {
     description = "SSH Access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [
-      var.my_ip,          # Your personal IP
-      "140.82.112.0/20",  # GitHub Actions
-      "143.55.64.0/20",   # GitHub Actions
-      "185.199.108.0/22", # GitHub Actions
-      "192.30.252.0/22"   # GitHub Actions
-    ]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # HTTP Access
