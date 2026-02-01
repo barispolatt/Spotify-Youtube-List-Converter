@@ -37,8 +37,8 @@ graph TD
         Frontend["React Frontend"]
         Backend["Spring Boot Backend"]
         Lambda["AWS Lambda (Spotify Fetcher)"]
-        DB["YouTube API"]
     end
+    DB["YouTube API"]
 
     User -->|HTTP| LB
     LB --> Frontend
