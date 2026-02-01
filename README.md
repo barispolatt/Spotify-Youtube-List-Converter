@@ -33,11 +33,11 @@ graph TD
     User[User Browser]
     
     subgraph AWS VPC
-        LB[Load Balancer / Nginx]
-        Frontend[React Frontend]
-        Backend[Spring Boot Backend]
-        Lambda[AWS Lambda (Spotify Fetcher)]
-        DB[YouTube API]
+        LB["Load Balancer / Nginx"]
+        Frontend["React Frontend"]
+        Backend["Spring Boot Backend"]
+        Lambda["AWS Lambda (Spotify Fetcher)"]
+        DB["YouTube API"]
     end
 
     User -->|HTTP| LB
