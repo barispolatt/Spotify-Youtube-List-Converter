@@ -38,3 +38,15 @@ variable "my_ip" {
   description = "Your personal IP address for SSH/API access (CIDR format, e.g. 1.2.3.4/32)"
   type        = string
 }
+
+variable "spotify_client_id" {
+  description = "Spotify Client ID for API access"
+  type        = string
+  sensitive   = true
+}
+
+variable "spotify_client_secret" {
+  description = "Spotify Client Secret for API access"
+  type        = string
+  sensitive   = true
+}
