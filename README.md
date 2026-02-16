@@ -142,7 +142,15 @@ To deploy the entire stack to AWS:
     terraform init
     ```
 
-3.  **Review Plan**
+3.  **Configure Credentials**
+    Create a `terraform.tfvars` file in `terraform/enviroments/dev/` to securely set your Spotify API keys:
+    ```hcl
+    spotify_client_id     = "your_spotify_client_id"
+    spotify_client_secret = "your_spotify_client_secret"
+    ```
+
+4.  **Review Plan**
+
     ```bash
     terraform plan
     ```
