@@ -170,6 +170,7 @@ To deploy the entire stack to AWS:
 |:--- | :--- | :--- |
 | `SPOTIFY_CLIENT_ID` | OAuth Client ID from Spotify Developer Dashboard | Yes |
 | `SPOTIFY_CLIENT_SECRET`| OAuth Client Secret | Yes |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend URLs (e.g., `http://localhost:3000`) | No (defaults to localhost) |
 | `SPRING_PROFILES_ACTIVE`| Spring Boot profile (e.g., `dev`, `prod`) | No (Local: default) |
 
 ---

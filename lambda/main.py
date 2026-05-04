@@ -39,12 +39,20 @@ def handler(event, context):
         if not playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'URL is missing!'})}
 
+        # Validate Spotify URL format
+        if 'spotify.com/playlist/' not in playlist_url:
+            return {'statusCode': 400, 'body': json.dumps({'error': 'Invalid Spotify playlist URL. Please provide a valid playlist link.'})}
+
         # Get Token (or None for Mock)
         token = get_token()
         
         if token:
             # REAL MODE: Pull playlist songs from Spotify
             playlist_id = playlist_url.split('/')[-1].split('?')[0]
+
+            if not playlist_id:
+                return {'statusCode': 400, 'body': json.dumps({'error': 'Could not extract playlist ID from URL.'})}
+
             req = urllib.request.Request(
                 f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit=50&fields=items(track(name,artists(name)))",
                 headers={'Authorization': f'Bearer {token}'}
@@ -68,6 +76,13 @@ def handler(event, context):
                 "The Weeknd - Blinding Lights",
                 "Imagine Dragons - Believer"
             ]
+
+        # Handle empty playlists
+        if not tracks:
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'error': 'This playlist is empty or contains no playable tracks.'})
+            }
         
         # Note: CORS headers are handled by Function URL config, not here
         return {

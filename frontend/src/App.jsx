@@ -100,6 +100,18 @@ function App() {
       const spotifyRes = await axios.post(LAMBDA_URL, { url });
       const trackList = spotifyRes.data;
 
+      // Handle error object from Lambda (e.g. empty playlist)
+      if (trackList && trackList.error) {
+        setStatus(`error:${trackList.error}`);
+        return;
+      }
+
+      // Handle empty track list
+      if (!Array.isArray(trackList) || trackList.length === 0) {
+        setStatus('error:This playlist appears to be empty. Please try a different playlist.');
+        return;
+      }
+
       setStatus(`loading:Found ${trackList.length} tracks. Searching YouTube Music...`);
 
       const youtubeRes = await axios.post(BACKEND_URL, trackList);
@@ -107,7 +119,9 @@ function App() {
       const gridData = youtubeRes.data.map((item, idx) => ({
         id: idx + 1,
         trackName: item.track,
-        youtubeLink: item.url
+        youtubeLink: item.url,
+        status: item.status,
+        message: item.message
       }));
       setRows(gridData);
       setStatus(`success:Successfully converted ${gridData.length} tracks!`);
@@ -275,7 +289,7 @@ function App() {
                         <TableCell color="text.secondary">{row.id}</TableCell>
                         <TableCell sx={{ fontWeight: 500 }}>{row.trackName}</TableCell>
                         <TableCell align="right">
-                          {row.youtubeLink && row.youtubeLink !== "Not found" ? (
+                          {row.status === "success" && row.youtubeLink ? (
                             <Button
                               component={Link}
                               href={row.youtubeLink}
@@ -297,7 +311,7 @@ function App() {
                             </Button>
                           ) : (
                             <Typography variant="body2" color="error">
-                              Not found
+                              {row.message || 'Not found'}
                             </Typography>
                           )}
                         </TableCell>

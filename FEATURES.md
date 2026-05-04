@@ -11,9 +11,9 @@ This document outlines the required fixes, architectural improvements, and poten
 
 ## 🟡 Medium Priority Fixes
 
-- [ ] **Add Proper Error Objects in Backend**: The backend currently returns string messages or "Not found" for missing tracks. Standardize the API response to return structured JSON error objects (e.g., `{ "status": "error", "message": "..." }`) for better frontend error handling.
-- [ ] **Handle Empty Playlists gracefully**: Ensure both the Lambda function and the Backend gracefully handle empty playlists or invalid Spotify URLs with clear error messages returned to the user.
-- [ ] **CORS Configuration Optimization**: The Spring Boot backend uses `*` for allowed origins, methods, and headers. Restrict CORS to specific frontend domains (e.g., the Vercel/Netlify domain or localhost) for improved security.
+- [x] **Add Proper Error Objects in Backend**: The backend currently returns string messages or "Not found" for missing tracks. Standardize the API response to return structured JSON error objects (e.g., `{ "status": "error", "message": "..." }`) for better frontend error handling.
+- [x] **Handle Empty Playlists gracefully**: Ensure both the Lambda function and the Backend gracefully handle empty playlists or invalid Spotify URLs with clear error messages returned to the user.
+- [x] **CORS Configuration Optimization**: The Spring Boot backend uses `*` for allowed origins, methods, and headers. Restrict CORS to specific frontend domains (e.g., the Vercel/Netlify domain or localhost) for improved security.
 
 ## 🟢 Potential Updates & Features
 

@@ -27,11 +27,11 @@ spec:
               secretKeyRef:
                 name: backend-secrets
                 key: SPOTIFY_CLIENT_SECRET
-          - name: YOUTUBE_API_KEY
+          - name: CORS_ALLOWED_ORIGINS
             valueFrom:
               secretKeyRef:
                 name: backend-secrets
-                key: YOUTUBE_API_KEY
+                key: CORS_ALLOWED_ORIGINS
         ports:
         - containerPort: 8080
         livenessProbe:
@@ -48,10 +48,10 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 5
         resources:
-          # t3.micro (1GB RAM) - increased for yt-dlp processing
+          # t3.small (2GB RAM, 2 vCPU) - sized for JVM + concurrent yt-dlp
           limits:
-            memory: "512Mi"
-            cpu: "800m"
+            memory: "1024Mi"
+            cpu: "1500m"
           requests:
-            memory: "350Mi"
-            cpu: "200m"
+            memory: "512Mi"
+            cpu: "300m"

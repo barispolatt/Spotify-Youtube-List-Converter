@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y python3 curl && \
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# JVM settings for RAM limitations (t3.micro 1GB RAM)
-ENV JAVA_OPTS="-Xmx400m -Xms256m"
+# JVM settings for t3.small (2GB RAM)
+ENV JAVA_OPTS="-Xmx768m -Xms512m"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

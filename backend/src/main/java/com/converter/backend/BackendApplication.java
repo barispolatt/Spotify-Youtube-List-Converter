@@ -2,6 +2,7 @@ package com.converter.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.cors.CorsConfiguration;
@@ -24,13 +25,16 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
     }
 
-    // Global CORS configuration
+    @Value("${cors.allowed.origins:http://localhost:3000,http://localhost:5173}")
+    private String allowedOrigins;
+
+    // Global CORS configuration - restricted to known frontend domains
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("*"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -50,8 +54,14 @@ public class BackendApplication {
 
     @PostMapping("/search")
     public List<SearchResult> searchTracks(@RequestBody List<String> queries) {
+        // Guard against empty or null query lists
+        if (queries == null || queries.isEmpty()) {
+            return List.of();
+        }
+
         // Start an asynchronous search for every track name
         List<CompletableFuture<SearchResult>> futures = queries.stream()
+                .filter(query -> query != null && !query.trim().isEmpty())
                 .map(query -> CompletableFuture.supplyAsync(() -> findUrl(query), executor))
                 .collect(Collectors.toList());
 
@@ -87,15 +97,16 @@ public class BackendApplication {
 
             if (videoId != null && !videoId.trim().isEmpty()) {
                 String youtubeUrl = "https://music.youtube.com/watch?v=" + videoId.trim();
-                return new SearchResult(query, youtubeUrl);
+                return new SearchResult(query, youtubeUrl, "success", null);
             }
+            return new SearchResult(query, null, "not_found", "No YouTube result found for this track");
         } catch (Exception e) {
             e.printStackTrace();
+            return new SearchResult(query, null, "error", "Search failed: " + e.getMessage());
         }
-        return new SearchResult(query, "Not found");
     }
 
-    // DTO
-    public record SearchResult(String track, String url) {
+    // DTO with structured status and error message
+    public record SearchResult(String track, String url, String status, String message) {
     }
 }
