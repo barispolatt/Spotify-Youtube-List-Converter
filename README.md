@@ -38,14 +38,14 @@ graph TD
         Backend["Spring Boot Backend"]
         Lambda["AWS Lambda (Spotify Fetcher)"]
     end
-    DB["YouTube API"]
+    DB["YouTube Web"]
 
     User -->|HTTP| LB
     LB --> Frontend
     LB --> Backend
     Frontend -->|Invoke| Lambda
     Frontend -->|Search| Backend
-    Backend -->|Search| DB
+    Backend -->|yt-dlp| DB
     Lambda -->|Spotify API| Spotify[Spotify API]
 ```
 
@@ -117,7 +117,6 @@ The easiest way to run the full stack locally is using Docker Compose.
     ```env
     SPOTIFY_CLIENT_ID=your_id
     SPOTIFY_CLIENT_SECRET=your_secret
-    YOUTUBE_API_KEY=your_key
     ```
 
 3.  **Start Services**
@@ -171,7 +170,6 @@ To deploy the entire stack to AWS:
 |:--- | :--- | :--- |
 | `SPOTIFY_CLIENT_ID` | OAuth Client ID from Spotify Developer Dashboard | Yes |
 | `SPOTIFY_CLIENT_SECRET`| OAuth Client Secret | Yes |
-| `YOUTUBE_API_KEY` | API Key for YouTube Data API v3 | Yes |
 | `SPRING_PROFILES_ACTIVE`| Spring Boot profile (e.g., `dev`, `prod`) | No (Local: default) |
 
 ---

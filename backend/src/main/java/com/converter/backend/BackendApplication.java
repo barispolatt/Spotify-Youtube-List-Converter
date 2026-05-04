@@ -38,8 +38,8 @@ public class BackendApplication {
         return new CorsFilter(source);
     }
 
-    // Creating thread pool - limited to 2 to prevent OOM on small instances
-    private final ExecutorService executor = Executors.newFixedThreadPool(2);
+    // Creating thread pool - set to 4 for better concurrency without OOMing yt-dlp
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     @PreDestroy
     public void cleanup() {
@@ -48,7 +48,7 @@ public class BackendApplication {
 
     @PostMapping("/search")
     public List<SearchResult> searchTracks(@RequestBody List<String> queries) {
-        // Start an asynchronus search for every track name
+        // Start an asynchronous search for every track name
         List<CompletableFuture<SearchResult>> futures = queries.stream()
                 .map(query -> CompletableFuture.supplyAsync(() -> findUrl(query), executor))
                 .collect(Collectors.toList());

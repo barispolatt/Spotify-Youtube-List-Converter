@@ -18,5 +18,5 @@ services:
     environment:
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
-      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+
     restart: always
