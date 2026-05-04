@@ -7,7 +7,7 @@ This document outlines the required fixes, architectural improvements, and poten
 - [x] **Fix Language Inconsistency in Frontend Error Handling**: The frontend `App.jsx` checks for `row.youtubeLink !== "Bulunamadı"` (Turkish) to disable the listen link, but the backend `BackendApplication.java` returns `"Not found"` (English) on failure. Update the frontend condition to check for `"Not found"` to properly hide broken links.
 - [x] **Align Implementation with Documentation (MUI)**: The `README.md` states the project uses Material UI (MUI), and it's installed in `package.json`, but `App.jsx` uses pure CSS and basic HTML elements. Refactor the frontend to utilize MUI components for consistency and better maintainability.
 - [x] **Align Implementation with Documentation (YouTube API)**: *Resolution: The documentation has been updated to reflect the use of `yt-dlp`. While the official YouTube Data API was considered, its strict free tier quota (10,000 units/day) makes it unsuitable for a high-volume public application.*
-- [ ] **Optimize Backend Concurrency**: The backend uses a fixed thread pool of 2 (`Executors.newFixedThreadPool(2)`). Processing a 50-track playlist is extremely slow because only 2 `yt-dlp` processes run concurrently. Introduce a more robust async queue mechanism or evaluate scaling the thread pool size based on the environment to improve performance.
+- [x] **Optimize Backend Concurrency**: The backend uses a fixed thread pool of 2 (`Executors.newFixedThreadPool(2)`). Processing a 50-track playlist is extremely slow because only 2 `yt-dlp` processes run concurrently. Introduce a more robust async queue mechanism or evaluate scaling the thread pool size based on the environment to improve performance.
 
 ## 🟡 Medium Priority Fixes
 

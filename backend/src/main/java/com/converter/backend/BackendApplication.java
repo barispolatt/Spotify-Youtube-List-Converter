@@ -38,8 +38,10 @@ public class BackendApplication {
         return new CorsFilter(source);
     }
 
-    // Creating thread pool - set to 4 for better concurrency without OOMing yt-dlp
-    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    // Scale thread pool dynamically based on environment (available processors) to improve performance
+    private final ExecutorService executor = Executors.newFixedThreadPool(
+            Math.max(4, Runtime.getRuntime().availableProcessors() * 2)
+    );
 
     @PreDestroy
     public void cleanup() {
