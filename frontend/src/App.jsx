@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import axios from 'axios';
 import {
   ThemeProvider,
@@ -77,13 +77,85 @@ const darkTheme = createTheme({
   },
 });
 
+// ── Progress Bar Component ─────────────────────────────────────────────────────
+function ProgressBar({ current, total }) {
+  const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+
+  return (
+    <Box className="progress-container">
+      {/* Header row: label left, counter right */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Box className="progress-pulse-dot" />
+          <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, letterSpacing: '0.03em' }}>
+            Searching YouTube Music
+          </Typography>
+        </Box>
+        <Box className="progress-counter">
+          <Typography component="span" sx={{ fontSize: '1.1rem', fontWeight: 800, color: '#1db954' }}>
+            {current}
+          </Typography>
+          <Typography component="span" sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', mx: 0.5 }}>
+            /
+          </Typography>
+          <Typography component="span" sx={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>
+            {total}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Track bar */}
+      <Box className="progress-track">
+        <Box
+          className="progress-fill"
+          style={{ width: `${pct}%` }}
+        />
+        {/* Shimmer overlay — always full-width, clips to fill via parent */}
+        <Box className="progress-shimmer" style={{ width: `${pct}%` }} />
+      </Box>
+
+      {/* Footer row: percentage left, ETA right */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+          {pct}% complete
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.3)' }}>
+          {total - current} remaining
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Main App ──────────────────────────────────────────────────────────────────
 function App() {
   const [url, setUrl] = useState('');
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  // SSE progress state
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamProgress, setStreamProgress] = useState({ current: 0, total: 0 });
+  const readerRef = useRef(null);
   const rowsPerPage = 8;
+
+  // Parse raw SSE text chunks into individual event blocks.
+  // A single chunk may contain multiple events separated by "\n\n".
+  const parseSseChunk = (text) => {
+    const events = [];
+    const blocks = text.split('\n\n').filter(Boolean);
+    for (const block of blocks) {
+      let name = '';
+      let data = '';
+      for (const line of block.split('\n')) {
+        if (line.startsWith('event:')) name = line.slice(6).trim();
+        if (line.startsWith('data:')) data = line.slice(5).trim();
+      }
+      if (name && data) events.push({ name, data });
+    }
+    return events;
+  };
 
   const handleConvert = async () => {
     if (!url.includes('spotify.com')) {
@@ -92,44 +164,104 @@ function App() {
     }
 
     setLoading(true);
+    setIsStreaming(false);
+    setStreamProgress({ current: 0, total: 0 });
     setStatus('loading:Analyzing your Spotify playlist...');
     setRows([]);
     setPage(1);
 
     try {
+      // Step 1: Fetch track list from Lambda
       const spotifyRes = await axios.post(LAMBDA_URL, { url });
       const trackList = spotifyRes.data;
 
-      // Handle error object from Lambda (e.g. empty playlist)
       if (trackList && trackList.error) {
         setStatus(`error:${trackList.error}`);
         return;
       }
-
-      // Handle empty track list
       if (!Array.isArray(trackList) || trackList.length === 0) {
         setStatus('error:This playlist appears to be empty. Please try a different playlist.');
         return;
       }
 
-      setStatus(`loading:Found ${trackList.length} tracks. Searching YouTube Music...`);
+      // Step 2: Open SSE stream to backend
+      setStatus('loading:Connecting to YouTube search...');
 
-      const youtubeRes = await axios.post(BACKEND_URL, trackList);
+      const response = await fetch(`${BACKEND_URL}/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trackList),
+      });
 
-      const gridData = youtubeRes.data.map((item, idx) => ({
-        id: idx + 1,
-        trackName: item.track,
-        youtubeLink: item.url,
-        status: item.status,
-        message: item.message
-      }));
-      setRows(gridData);
-      setStatus(`success:Successfully converted ${gridData.length} tracks!`);
+      if (!response.ok || !response.body) {
+        throw new Error(`Backend returned ${response.status}`);
+      }
+
+      setIsStreaming(true);
+      const reader = response.body.getReader();
+      readerRef.current = reader;
+      const decoder = new TextDecoder();
+
+      const collectedRows = [];
+      let buffer = '';
+
+      // Step 3: Read the SSE stream chunk by chunk
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Events are separated by double-newline
+        const boundary = buffer.lastIndexOf('\n\n');
+        if (boundary === -1) continue;
+
+        const completeChunk = buffer.slice(0, boundary + 2);
+        buffer = buffer.slice(boundary + 2);
+
+        const events = parseSseChunk(completeChunk);
+
+        for (const { name, data } of events) {
+          const payload = JSON.parse(data);
+
+          if (name === 'total') {
+            setStreamProgress({ current: 0, total: payload.total });
+            setStatus('streaming:');
+          }
+
+          if (name === 'track') {
+            setStreamProgress({ current: payload.current, total: payload.total });
+            collectedRows.push({
+              id: payload.current,
+              trackName: payload.track,
+              youtubeLink: payload.url || null,
+              status: payload.status,
+              message: payload.message || null,
+            });
+          }
+
+          if (name === 'done') {
+            const found = collectedRows.filter(r => r.status === 'success').length;
+            // Sort by original id to maintain playlist order
+            collectedRows.sort((a, b) => a.id - b.id);
+            setRows(collectedRows);
+            setStatus(`success:Done! Found ${found} of ${payload.total} tracks on YouTube Music.`);
+            setIsStreaming(false);
+          }
+
+          if (name === 'error') {
+            setStatus(`error:${payload.message}`);
+            setIsStreaming(false);
+          }
+        }
+      }
     } catch (error) {
       console.error(error);
       setStatus('error:Something went wrong. Please try again.');
+      setIsStreaming(false);
     } finally {
       setLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -139,11 +271,17 @@ function App() {
   const getStatusType = () => {
     if (status.startsWith('error:')) return 'error';
     if (status.startsWith('success:')) return 'success';
-    if (status.startsWith('loading:')) return 'info';
+    if (status.startsWith('loading:') || status.startsWith('streaming:')) return 'info';
     return 'info';
   };
 
-  const getStatusText = () => status.split(':')[1] || status;
+  const getStatusText = () => {
+    const text = status.split(':').slice(1).join(':') || status;
+    return text;
+  };
+
+  const showStatus = status && !status.startsWith('streaming:');
+  const showProgress = isStreaming && streamProgress.total > 0;
 
   const handlePageChange = (event, value) => {
     setPage(value);
@@ -153,7 +291,7 @@ function App() {
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <div className="grid-overlay"></div>
-      
+
       <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
         {/* Logo Section */}
         <Box display="flex" justifyContent="center" mb={4}>
@@ -203,6 +341,7 @@ function App() {
                 }}
               />
               <Button
+                id="convert-btn"
                 variant="contained"
                 color="primary"
                 size="large"
@@ -231,12 +370,21 @@ function App() {
           </CardContent>
         </Card>
 
-        {/* Status Badge */}
-        {status && (
-          <Alert 
-            severity={getStatusType()} 
+        {/* SSE Progress Bar — shown only while streaming */}
+        {showProgress && (
+          <Card sx={{ mb: 4 }}>
+            <CardContent>
+              <ProgressBar current={streamProgress.current} total={streamProgress.total} />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Status Alert — hidden during active streaming to avoid visual clutter */}
+        {showStatus && (
+          <Alert
+            severity={getStatusType()}
             sx={{ mb: 4, borderRadius: 2, alignItems: 'center' }}
-            icon={getStatusType() === 'info' && loading ? <CircularProgress size={20} /> : undefined}
+            icon={getStatusType() === 'info' && loading && !isStreaming ? <CircularProgress size={20} /> : undefined}
           >
             {getStatusText()}
           </Alert>
@@ -325,11 +473,11 @@ function App() {
             {/* Pagination */}
             {rows.length > rowsPerPage && (
               <Box display="flex" justifyContent="center" mt={4}>
-                <Pagination 
-                  count={totalPages} 
-                  page={page} 
-                  onChange={handlePageChange} 
-                  color="primary" 
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="primary"
                   shape="rounded"
                 />
               </Box>

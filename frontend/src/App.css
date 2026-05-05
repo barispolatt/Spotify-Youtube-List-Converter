@@ -85,3 +85,97 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+/* ── Progress Bar ──────────────────────────────────────────────── */
+
+.progress-container {
+  padding: 4px 0;
+}
+
+/* Track — the grey rail */
+.progress-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+/* Fill — animated width via inline style */
+.progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1db954 0%, #17a349 50%, #ff0000 100%);
+  background-size: 200% 100%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: progressGradientShift 3s linear infinite;
+}
+
+@keyframes progressGradientShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Shimmer — sweeps across the filled area */
+.progress-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.progress-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  animation: shimmerSweep 1.6s ease-in-out infinite;
+}
+
+@keyframes shimmerSweep {
+  0%   { left: -60%; }
+  100% { left: 120%; }
+}
+
+/* Pulsing dot — live indicator */
+.progress-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1db954;
+  box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.6);
+  animation: pulseDot 1.4s ease-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulseDot {
+  0%   { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(29, 185, 84, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0); }
+}
+
+/* Counter badge */
+.progress-counter {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}

@@ -1,18 +1,24 @@
 package com.converter.backend;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import jakarta.annotation.PreDestroy;
 
@@ -27,6 +33,8 @@ public class BackendApplication {
 
     @Value("${cors.allowed.origins:http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Global CORS configuration - restricted to known frontend domains
     @Bean
@@ -43,7 +51,7 @@ public class BackendApplication {
     }
 
     // Scale thread pool dynamically based on environment (available processors) to
-    // improve performance
+    // improve performance. Min 20 for I/O-bound yt-dlp processes on t3a.small.
     private final ExecutorService executor = Executors.newFixedThreadPool(
             Math.max(20, Runtime.getRuntime().availableProcessors() * 2));
 
@@ -52,6 +60,7 @@ public class BackendApplication {
         executor.shutdown();
     }
 
+    // ── Original blocking endpoint (kept for backward compatibility) ──────────
     @PostMapping("/search")
     public List<SearchResult> searchTracks(@RequestBody List<String> queries) {
         // Guard against empty or null query lists
@@ -69,6 +78,81 @@ public class BackendApplication {
         return futures.stream()
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
+    }
+
+    // ── SSE streaming endpoint ────────────────────────────────────────────────
+    // Emits named SSE events as each track is resolved, so the frontend can
+    // update the progress bar in real-time without waiting for all results.
+    @PostMapping(value = "/search/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter searchTracksStream(@RequestBody List<String> queries) {
+        // 5-minute timeout — generous for very large playlists
+        SseEmitter emitter = new SseEmitter(300_000L);
+
+        if (queries == null || queries.isEmpty()) {
+            try {
+                emitter.send(SseEmitter.event().name("error")
+                        .data("{\"message\":\"No tracks provided\"}"));
+                emitter.complete();
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+            }
+            return emitter;
+        }
+
+        List<String> validQueries = queries.stream()
+                .filter(q -> q != null && !q.trim().isEmpty())
+                .collect(Collectors.toList());
+
+        int total = validQueries.size();
+        AtomicInteger completed = new AtomicInteger(0);
+
+        // Send the total count immediately so the frontend can set the denominator
+        try {
+            emitter.send(SseEmitter.event().name("total")
+                    .data("{\"total\":" + total + "}"));
+        } catch (IOException e) {
+            emitter.completeWithError(e);
+            return emitter;
+        }
+
+        // Dispatch all track searches concurrently; emit each result as it finishes
+        List<CompletableFuture<Void>> futures = validQueries.stream()
+                .map(query -> CompletableFuture.runAsync(() -> {
+                    SearchResult result = findUrl(query);
+                    int current = completed.incrementAndGet();
+                    try {
+                        Map<String, Object> payload = Map.of(
+                                "current", current,
+                                "total", total,
+                                "track", result.track(),
+                                "url", result.url() != null ? result.url() : "",
+                                "status", result.status(),
+                                "message", result.message() != null ? result.message() : "");
+                        emitter.send(SseEmitter.event().name("track")
+                                .data(objectMapper.writeValueAsString(payload)));
+                    } catch (IOException e) {
+                        emitter.completeWithError(e);
+                    }
+                }, executor))
+                .collect(Collectors.toList());
+
+        // When every future is done, send the summary "done" event and close the stream
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> {
+                    try {
+                        emitter.send(SseEmitter.event().name("done")
+                                .data("{\"total\":" + total + "}"));
+                        emitter.complete();
+                    } catch (IOException e) {
+                        emitter.completeWithError(e);
+                    }
+                })
+                .exceptionally(ex -> {
+                    emitter.completeWithError(ex);
+                    return null;
+                });
+
+        return emitter;
     }
 
     @GetMapping("/health")
