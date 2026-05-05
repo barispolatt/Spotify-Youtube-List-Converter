@@ -42,10 +42,10 @@ public class BackendApplication {
         return new CorsFilter(source);
     }
 
-    // Scale thread pool dynamically based on environment (available processors) to improve performance
+    // Scale thread pool dynamically based on environment (available processors) to
+    // improve performance
     private final ExecutorService executor = Executors.newFixedThreadPool(
-            Math.max(4, Runtime.getRuntime().availableProcessors() * 2)
-    );
+            Math.max(20, Runtime.getRuntime().availableProcessors() * 2));
 
     @PreDestroy
     public void cleanup() {

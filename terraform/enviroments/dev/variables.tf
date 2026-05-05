@@ -23,9 +23,9 @@ variable "public_subnet_cidr" {
 }
 
 variable "instance_type" {
-  description = "EC2 server type (t2.micro or t3.micro for Free Tier)"
+  description = "EC2 server type (It was t2.micro or t3.micro for Free Tier but updated to t3a.small to use more threads for yt-dlp)"
   type        = string
-  default     = "t3.micro"
+  default     = "t3a.small"
 }
 
 variable "key_name" {

@@ -30,4 +30,4 @@ This document serves as a comprehensive record of the development progress, arch
 
 ## 📝 Documentation
 - **README.md**: Wrote a comprehensive README detailing the architecture, tech stack, prerequisites, and instructions for both local Docker and cloud Terraform deployments.
-- **Learning & Guides**: Created `LEARNINGS.md` and `project_comprehensive_guide.md` to document the journey, DevOps practices, and architectural decisions made throughout the project lifecycle.
+
