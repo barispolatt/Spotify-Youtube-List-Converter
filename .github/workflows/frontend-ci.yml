@@ -68,11 +68,11 @@ jobs:
         envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY
         script: |
           # Deploy via Helm (atomic: auto-rollback on failure)
-          export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
           sudo helm upgrade --install spotify-converter \
             /home/ubuntu/spotify-project/helm/spotify-converter/ \
             -f /home/ubuntu/spotify-project/helm/spotify-converter/values-dev.yaml \
             --set frontend.image.repository=$ECR_REGISTRY/$ECR_REPOSITORY \
             --set frontend.image.tag=$IMAGE_TAG \
+            --kubeconfig /etc/rancher/k3s/k3s.yaml \
             --atomic \
             --timeout 5m
