@@ -8,6 +8,9 @@ on:
       - '.github/workflows/frontend-ci.yml'
       - 'helm/**'
 
+concurrency: 
+  group: helm-deploy
+  
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: spotify-youtube-frontend
