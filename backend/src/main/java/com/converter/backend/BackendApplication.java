@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import jakarta.annotation.PreDestroy;
 
@@ -128,7 +129,7 @@ public class BackendApplication {
                                 "url", result.url() != null ? result.url() : "",
                                 "status", result.status(),
                                 "message", result.message() != null ? result.message() : "");
-                        String json = objectMapper.writeValueAsString(payload);
+                        String json = Objects.requireNonNull(objectMapper.writeValueAsString(payload));
                         emitter.send(SseEmitter.event().name("track").data(json));
                     } catch (IOException e) {
                         emitter.completeWithError(e);
