@@ -6,7 +6,7 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend-ci.yml'
-      - 'k8s/**'
+      - 'helm/**'
 
 env:
   AWS_REGION: us-east-1
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -28,7 +28,7 @@ jobs:
 
     - name: Login to Amazon ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
@@ -39,37 +39,40 @@ jobs:
         cd frontend
         docker build \
           --build-arg VITE_LAMBDA_URL=${{ secrets.VITE_LAMBDA_URL }} \
-          --build-arg VITE_BACKEND_URL=http://${{ secrets.EC2_HOST }}:30080/api/v1/youtube/search \
+          --build-arg VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }} \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
-        # Prepare Kubernetes Manifests (Replace Placeholder Locally)
-        cd ..
-        sed -i "s|REPLACE_ME_IMAGE_URL|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/frontend-deployment.yaml
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
 
-    - name: Copy k8s files to EC2
-      uses: appleboy/scp-action@master
+    - name: Copy Helm chart to EC2
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "k8s/*"
+        source: "helm/*"
         target: "/home/ubuntu/spotify-project"
 
-    - name: Deploy to EC2 (K3s)
-      uses: appleboy/ssh-action@master
+    - name: Deploy to EC2 (K3s via Helm)
+      uses: appleboy/ssh-action@v1.0.3
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
+        envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY
         script: |
-          # 1. Update Image URL in manifest (Already done locally)
-          
-          # 2. Apply Kubernetes Manifests
-          sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-deployment.yaml
-          sudo k3s kubectl apply -f /home/ubuntu/spotify-project/k8s/frontend-service.yaml
-
-          # 3. Force Restart
-          sudo k3s kubectl rollout restart deployment youtube-frontend
+          # Deploy via Helm (atomic: auto-rollback on failure)
+          export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+          sudo helm upgrade --install spotify-converter \
+            /home/ubuntu/spotify-project/helm/spotify-converter/ \
+            -f /home/ubuntu/spotify-project/helm/spotify-converter/values-dev.yaml \
+            --set frontend.image.repository=$ECR_REGISTRY/$ECR_REPOSITORY \
+            --set frontend.image.tag=$IMAGE_TAG \
+            --atomic \
+            --timeout 5m

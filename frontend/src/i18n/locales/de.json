@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "spotify": "Spotify",
+    "arrow": "→",
+    "youtube": "YouTube",
+    "subtitle": "Verwandeln Sie Ihre Spotify-Playlists in Sekundenschnelle in YouTube Music. Schnell, kostenlos und wunderbar einfach."
+  },
+  "input": {
+    "placeholder": "Fügen Sie hier Ihre Spotify-Playlist-URL ein...",
+    "convertButton": "Playlist umwandeln",
+    "converting": "Wird umgewandelt..."
+  },
+  "progress": {
+    "searchingYouTube": "YouTube Music wird durchsucht",
+    "complete": "{{pct}}% abgeschlossen",
+    "remaining": "{{count}} verbleibend"
+  },
+  "status": {
+    "invalidUrl": "Bitte geben Sie eine gültige Spotify-Playlist-URL ein",
+    "analyzingPlaylist": "Ihre Spotify-Playlist wird analysiert...",
+    "connectingYouTube": "Verbindung zur YouTube-Suche wird hergestellt...",
+    "emptyPlaylist": "Diese Playlist scheint leer zu sein. Bitte versuchen Sie eine andere Playlist.",
+    "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "backendError": "Server hat Fehler {{status}} zurückgegeben",
+    "done": "Fertig! {{found}} von {{total}} Titeln auf YouTube Music gefunden."
+  },
+  "table": {
+    "title": "Ihre Titel",
+    "trackCount": "{{count}} Titel",
+    "headerNumber": "#",
+    "headerTrackName": "Titelname",
+    "headerAction": "Aktion",
+    "emptyTitle": "Ihre konvertierten Titel erscheinen hier",
+    "emptyHint": "Fügen Sie einen Spotify-Playlist-Link ein und klicken Sie auf Umwandeln",
+    "listenButton": "Anhören",
+    "notFound": "Nicht gefunden"
+  },
+  "footer": {
+    "madeWith": "Mit <heart>♥</heart> für Musikliebhaber überall erstellt"
+  },
+  "language": {
+    "label": "Sprache"
+  }
+}

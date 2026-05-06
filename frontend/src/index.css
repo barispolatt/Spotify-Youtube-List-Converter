@@ -5,9 +5,9 @@
 /* CSS Variables */
 :root {
   /* Colors */
-  --color-bg-primary: #0f0f23;
-  --color-bg-secondary: #1a1a2e;
-  --color-bg-tertiary: #16213e;
+  --color-bg-primary: #06060b;
+  --color-bg-secondary: #0d0d18;
+  --color-bg-tertiary: #111122;
   --color-surface: rgba(255, 255, 255, 0.05);
   --color-surface-hover: rgba(255, 255, 255, 0.1);
   --color-border: rgba(255, 255, 255, 0.1);
@@ -27,7 +27,7 @@
   
   /* Gradients */
   --gradient-hero: linear-gradient(135deg, var(--color-spotify) 0%, var(--color-youtube) 100%);
-  --gradient-bg: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+  --gradient-bg: linear-gradient(135deg, #06060b 0%, #0d0d18 50%, #111122 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
   
   /* Typography */
@@ -85,12 +85,12 @@ body::before {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(29, 185, 84, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+    radial-gradient(circle at 20% 80%, rgba(29, 185, 84, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 0, 0, 0.07) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.06) 0%, transparent 40%);
   pointer-events: none;
   z-index: -1;
-  animation: backgroundPulse 15s ease-in-out infinite alternate;
+  animation: backgroundPulse 20s ease-in-out infinite alternate;
 }
 
 @keyframes backgroundPulse {

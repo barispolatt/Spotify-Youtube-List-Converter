@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────────
+# PROD environment overrides
+# Usage: helm upgrade --install ... -f values-prod.yaml
+#
+# NOTE: Set CORS_ALLOWED_ORIGINS via --set or CI secrets when deploying.
+#       Do NOT hardcode your production domain here.
+# ─────────────────────────────────────────────────────────────────────
+
+backend:
+  replicas: 2
+  resources:
+    limits:
+      memory: "1280Mi"
+      cpu: "1800m"
+    requests:
+      memory: "640Mi"
+      cpu: "500m"
+  env:
+    # Set via CI at deploy time: --set backend.env.corsAllowedOrigins="https://yourdomain.com"
+    corsAllowedOrigins: ""
+
+frontend:
+  replicas: 2
+  resources:
+    limits:
+      memory: "128Mi"
+      cpu: "500m"
+    requests:
+      memory: "64Mi"
+      cpu: "100m"

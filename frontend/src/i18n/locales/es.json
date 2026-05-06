@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "spotify": "Spotify",
+    "arrow": "→",
+    "youtube": "YouTube",
+    "subtitle": "Transforma tus playlists de Spotify en YouTube Music en segundos. Rápido, gratuito e increíblemente simple."
+  },
+  "input": {
+    "placeholder": "Pega aquí el enlace de tu playlist de Spotify...",
+    "convertButton": "Convertir Playlist",
+    "converting": "Convirtiendo..."
+  },
+  "progress": {
+    "searchingYouTube": "Buscando en YouTube Music",
+    "complete": "{{pct}}% completado",
+    "remaining": "{{count}} restantes"
+  },
+  "status": {
+    "invalidUrl": "Por favor, introduce una URL válida de una playlist de Spotify",
+    "analyzingPlaylist": "Analizando tu playlist de Spotify...",
+    "connectingYouTube": "Conectando con la búsqueda de YouTube...",
+    "emptyPlaylist": "Esta playlist parece estar vacía. Prueba con una playlist diferente.",
+    "genericError": "Algo salió mal. Inténtalo de nuevo.",
+    "backendError": "El servidor devolvió el error {{status}}",
+    "done": "¡Listo! Se encontraron {{found}} de {{total}} pistas en YouTube Music."
+  },
+  "table": {
+    "title": "Tus pistas",
+    "trackCount": "{{count}} pistas",
+    "headerNumber": "#",
+    "headerTrackName": "Nombre de la pista",
+    "headerAction": "Acción",
+    "emptyTitle": "Tus pistas convertidas aparecerán aquí",
+    "emptyHint": "Pega un enlace de una playlist de Spotify y haz clic en Convertir",
+    "listenButton": "Escuchar",
+    "notFound": "No encontrado"
+  },
+  "footer": {
+    "madeWith": "Hecho con <heart>♥</heart> para los amantes de la música en todo el mundo"
+  },
+  "language": {
+    "label": "Idioma"
+  }
+}

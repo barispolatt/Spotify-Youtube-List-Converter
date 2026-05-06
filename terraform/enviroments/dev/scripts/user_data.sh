@@ -56,6 +56,11 @@ cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
 chown ubuntu:ubuntu /home/ubuntu/.kube/config
 chmod 600 /home/ubuntu/.kube/config
 
+# 5. Install Helm 3
+echo "Installing Helm 3..."
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+echo "Helm version: $(helm version --short)"
+
 echo "Define alias for K3s"
 echo "alias k=kubectl" >> /home/ubuntu/.bashrc
 

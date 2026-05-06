@@ -1,0 +1,8 @@
+apiVersion: v2
+name: spotify-converter
+description: Spotify to YouTube Music playlist converter — frontend and backend
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: barispolatt

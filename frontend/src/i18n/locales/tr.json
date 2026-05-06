@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "spotify": "Spotify",
+    "arrow": "→",
+    "youtube": "YouTube",
+    "subtitle": "Spotify çalma listelerinizi saniyeler içinde YouTube Music'e dönüştürün. Hızlı, ücretsiz ve son derece basit."
+  },
+  "input": {
+    "placeholder": "Spotify çalma listesi bağlantınızı buraya yapıştırın...",
+    "convertButton": "Çalma Listesini Dönüştür",
+    "converting": "Dönüştürülüyor..."
+  },
+  "progress": {
+    "searchingYouTube": "YouTube Music'te aranıyor",
+    "complete": "%{{pct}} tamamlandı",
+    "remaining": "{{count}} kalan"
+  },
+  "status": {
+    "invalidUrl": "Lütfen geçerli bir Spotify çalma listesi URL'si girin",
+    "analyzingPlaylist": "Spotify çalma listeniz analiz ediliyor...",
+    "connectingYouTube": "YouTube aramasına bağlanılıyor...",
+    "emptyPlaylist": "Bu çalma listesi boş görünüyor. Lütfen farklı bir çalma listesi deneyin.",
+    "genericError": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "backendError": "Sunucu {{status}} hatası döndürdü",
+    "done": "Tamamlandı! YouTube Music'te {{total}} parçadan {{found}} tanesi bulundu."
+  },
+  "table": {
+    "title": "Parçalarınız",
+    "trackCount": "{{count}} parça",
+    "headerNumber": "#",
+    "headerTrackName": "Parça Adı",
+    "headerAction": "İşlem",
+    "emptyTitle": "Dönüştürülen parçalarınız burada görünecek",
+    "emptyHint": "Bir Spotify çalma listesi bağlantısı yapıştırın ve Dönüştür'e tıklayın",
+    "listenButton": "Dinle",
+    "notFound": "Bulunamadı"
+  },
+  "footer": {
+    "madeWith": "Her yerdeki müzik severler için <heart>♥</heart> ile yapıldı"
+  },
+  "language": {
+    "label": "Dil"
+  }
+}

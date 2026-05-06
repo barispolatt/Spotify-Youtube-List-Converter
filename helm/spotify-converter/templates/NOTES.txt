@@ -1,0 +1,18 @@
+🎵 Spotify → YouTube Converter deployed!
+
+Release: {{ .Release.Name }}
+Chart:   {{ .Chart.Name }}-{{ .Chart.Version }}
+
+Backend:
+  Image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+  Port:  {{ .Values.backend.service.nodePort }} (NodePort)
+
+Frontend:
+  Image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+  Port:  {{ .Values.frontend.service.nodePort }} (NodePort)
+
+To check pod status:
+  kubectl get pods -l "app.kubernetes.io/instance={{ .Release.Name }}"
+
+To rollback:
+  helm rollback {{ .Release.Name }} <REVISION>

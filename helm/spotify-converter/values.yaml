@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────
+# Default values for spotify-converter Helm chart.
+# These are baseline defaults. Override per-environment in
+# values-dev.yaml / values-prod.yaml.
+# ─────────────────────────────────────────────────────────────────────
+
+# ── Backend (Spring Boot + yt-dlp) ────────────────────────────────────
+backend:
+  image:
+    repository: ""     # Set by CI: <account>.dkr.ecr.<region>.amazonaws.com/spotify-youtube-backend
+    tag: "latest"      # Set by CI: github.sha
+    pullPolicy: Always
+  replicas: 1
+  port: 8080
+  service:
+    type: NodePort
+    nodePort: 30080
+  resources:
+    limits:
+      memory: "1024Mi"
+      cpu: "1500m"
+    requests:
+      memory: "512Mi"
+      cpu: "300m"
+  healthCheck:
+    path: /api/v1/youtube/health
+    livenessInitialDelay: 60
+    livenessPeriod: 10
+    livenessFailureThreshold: 3
+    readinessInitialDelay: 10
+    readinessPeriod: 5
+  env:
+    corsAllowedOrigins: ""  # Override per-environment
+
+# ── Frontend (React / Nginx) ──────────────────────────────────────────
+frontend:
+  image:
+    repository: ""     # Set by CI
+    tag: "latest"      # Set by CI
+    pullPolicy: Always
+  replicas: 1
+  port: 80
+  service:
+    type: NodePort
+    nodePort: 30081
+  resources:
+    limits:
+      memory: "100Mi"
+      cpu: "500m"
+    requests:
+      memory: "50Mi"
+      cpu: "100m"
+  healthCheck:
+    path: /
+    livenessInitialDelay: 10
+    livenessPeriod: 10
+    readinessInitialDelay: 5
+    readinessPeriod: 5
+
+# ── Shared ─────────────────────────────────────────────────────────────
+secrets:
+  # Name of the pre-existing Kubernetes Secret.
+  # Created by CI before helm install — Helm does NOT manage secrets
+  # containing sensitive credentials to avoid them leaking into values files.
+  existingSecret: "backend-secrets"

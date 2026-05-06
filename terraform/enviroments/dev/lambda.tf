@@ -23,15 +23,17 @@ resource "aws_lambda_function" "spotify_service" {
 }
 
 # Public URL with NONE authorization
+# SECURITY NOTE: This Lambda is intentionally public (no auth) — it only
+# returns track names from public Spotify playlists. No user data is stored.
 resource "aws_lambda_function_url" "url" {
   function_name      = aws_lambda_function.spotify_service.function_name
   authorization_type = "NONE"
   
   cors {
     allow_credentials = false
-    allow_origins     = ["*"]
-    allow_methods     = ["*"]
-    allow_headers     = ["*"]
+    allow_origins     = ["*"]  # Must be wildcard — frontend domain varies per environment
+    allow_methods     = ["POST"]  # Only methods the frontend uses
+    allow_headers     = ["Content-Type"]     # Only header the frontend sends
     max_age           = 86400
   }
 }

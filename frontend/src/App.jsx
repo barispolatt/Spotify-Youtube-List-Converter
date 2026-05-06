@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
+import { LANGUAGES } from './i18n';
 import axios from 'axios';
 import {
   ThemeProvider,
@@ -22,7 +24,12 @@ import {
   Pagination,
   CircularProgress,
   Stack,
-  Link
+  Link,
+  Menu,
+  MenuItem,
+  ListItemText,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import './App.css';
 
@@ -39,8 +46,8 @@ const darkTheme = createTheme({
       main: '#ff0000', // YouTube Red
     },
     background: {
-      default: '#0a0a0a',
-      paper: 'rgba(255, 255, 255, 0.05)',
+      default: '#06060b',
+      paper: 'rgba(255, 255, 255, 0.04)',
     },
   },
   typography: {
@@ -77,8 +84,101 @@ const darkTheme = createTheme({
   },
 });
 
+// ── Language Switcher Component ───────────────────────────────────────────────
+function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSelect = (code) => {
+    i18n.changeLanguage(code);
+    handleClose();
+  };
+
+  return (
+    <>
+      <Tooltip title={currentLang.label} arrow>
+        <IconButton
+          id="language-switcher-btn"
+          onClick={handleClick}
+          sx={{
+            fontSize: '1.5rem',
+            width: 44,
+            height: 44,
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '12px',
+            background: 'rgba(255, 255, 255, 0.04)',
+            backdropFilter: 'blur(8px)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderColor: 'rgba(255, 255, 255, 0.25)',
+              transform: 'scale(1.05)',
+            },
+          }}
+        >
+          {currentLang.flag}
+        </IconButton>
+      </Tooltip>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          paper: {
+            sx: {
+              background: 'rgba(20, 20, 30, 0.95)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              minWidth: 180,
+              mt: 1,
+            },
+          },
+        }}
+      >
+        {LANGUAGES.map((lang) => (
+          <MenuItem
+            key={lang.code}
+            onClick={() => handleSelect(lang.code)}
+            selected={lang.code === i18n.language}
+            sx={{
+              borderRadius: '8px',
+              mx: 0.5,
+              my: 0.25,
+              gap: 1.5,
+              '&.Mui-selected': {
+                background: 'rgba(29, 185, 84, 0.15)',
+                '&:hover': {
+                  background: 'rgba(29, 185, 84, 0.25)',
+                },
+              },
+            }}
+          >
+            <Box component="span" sx={{ fontSize: '1.3rem' }}>
+              {lang.flag}
+            </Box>
+            <ListItemText primary={lang.label} />
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+}
+
 // ── Progress Bar Component ─────────────────────────────────────────────────────
 function ProgressBar({ current, total }) {
+  const { t } = useTranslation();
   const pct = total > 0 ? Math.round((current / total) * 100) : 0;
 
   return (
@@ -88,7 +188,7 @@ function ProgressBar({ current, total }) {
         <Box display="flex" alignItems="center" gap={1}>
           <Box className="progress-pulse-dot" />
           <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, letterSpacing: '0.03em' }}>
-            Searching YouTube Music
+            {t('progress.searchingYouTube')}
           </Typography>
         </Box>
         <Box className="progress-counter">
@@ -117,10 +217,10 @@ function ProgressBar({ current, total }) {
       {/* Footer row: percentage left, ETA right */}
       <Box display="flex" justifyContent="space-between" alignItems="center" mt={1}>
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-          {pct}% complete
+          {t('progress.complete', { pct })}
         </Typography>
         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.3)' }}>
-          {total - current} remaining
+          {t('progress.remaining', { count: total - current })}
         </Typography>
       </Box>
     </Box>
@@ -129,6 +229,7 @@ function ProgressBar({ current, total }) {
 
 // ── Main App ──────────────────────────────────────────────────────────────────
 function App() {
+  const { t } = useTranslation();
   const [url, setUrl] = useState('');
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -159,14 +260,14 @@ function App() {
 
   const handleConvert = async () => {
     if (!url.includes('spotify.com')) {
-      setStatus('error:Please enter a valid Spotify playlist URL');
+      setStatus('error:' + t('status.invalidUrl'));
       return;
     }
 
     setLoading(true);
     setIsStreaming(false);
     setStreamProgress({ current: 0, total: 0 });
-    setStatus('loading:Analyzing your Spotify playlist...');
+    setStatus('loading:' + t('status.analyzingPlaylist'));
     setRows([]);
     setPage(1);
 
@@ -180,12 +281,12 @@ function App() {
         return;
       }
       if (!Array.isArray(trackList) || trackList.length === 0) {
-        setStatus('error:This playlist appears to be empty. Please try a different playlist.');
+        setStatus('error:' + t('status.emptyPlaylist'));
         return;
       }
 
       // Step 2: Open SSE stream to backend
-      setStatus('loading:Connecting to YouTube search...');
+      setStatus('loading:' + t('status.connectingYouTube'));
 
       const response = await fetch(`${BACKEND_URL}/stream`, {
         method: 'POST',
@@ -194,7 +295,7 @@ function App() {
       });
 
       if (!response.ok || !response.body) {
-        throw new Error(`Backend returned ${response.status}`);
+        throw new Error(t('status.backendError', { status: response.status }));
       }
 
       setIsStreaming(true);
@@ -245,7 +346,7 @@ function App() {
             // Sort by original id to maintain playlist order
             collectedRows.sort((a, b) => a.id - b.id);
             setRows(collectedRows);
-            setStatus(`success:Done! Found ${found} of ${payload.total} tracks on YouTube Music.`);
+            setStatus('success:' + t('status.done', { found, total: payload.total }));
             setIsStreaming(false);
           }
 
@@ -257,7 +358,7 @@ function App() {
       }
     } catch (error) {
       console.error(error);
-      setStatus('error:Something went wrong. Please try again.');
+      setStatus('error:' + t('status.genericError'));
       setIsStreaming(false);
     } finally {
       setLoading(false);
@@ -292,36 +393,35 @@ function App() {
       <CssBaseline />
       <div className="grid-overlay"></div>
 
+      {/* Floating particles */}
+      <div className="particles">
+        {Array.from({ length: 15 }, (_, i) => (
+          <div key={i} className="particle" />
+        ))}
+      </div>
+
+      {/* Horizontal glow accents */}
+      <div className="glow-line glow-line--green" />
+      <div className="glow-line glow-line--red" />
+
       <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
-        {/* Logo Section */}
-        <Box display="flex" justifyContent="center" mb={4}>
-          <Box
-            sx={{
-              width: 60,
-              height: 60,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(29, 185, 84, 0.2) 0%, rgba(255, 0, 0, 0.2) 100%)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              fontSize: '2rem',
-            }}
-          >
-            🎵
-          </Box>
+        {/* Top bar: Logo + Language Switcher */}
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+          <div className="logo-container">
+            <img src="/logo.png?v=2" alt="Spotify to YouTube Converter" />
+          </div>
+          <LanguageSwitcher />
         </Box>
 
         {/* Hero Section */}
         <Box textAlign="center" mb={6}>
           <Typography variant="h3" component="h1" fontWeight={800} gutterBottom sx={{ fontSize: { xs: '2rem', sm: '3rem' } }}>
-            <Box component="span" sx={{ color: '#1db954' }}>Spotify</Box>
-            <Box component="span" sx={{ mx: 2, color: 'text.secondary' }}>→</Box>
-            <Box component="span" sx={{ color: '#ff0000' }}>YouTube</Box>
+            <Box component="span" sx={{ color: '#1db954' }}>{t('hero.spotify')}</Box>
+            <Box component="span" sx={{ mx: 2, color: 'text.secondary' }}>{t('hero.arrow')}</Box>
+            <Box component="span" sx={{ color: '#ff0000' }}>{t('hero.youtube')}</Box>
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-            Transform your Spotify playlists into YouTube Music in seconds.
-            Fast, free, and beautifully simple.
+            {t('hero.subtitle')}
           </Typography>
         </Box>
 
@@ -332,7 +432,7 @@ function App() {
               <TextField
                 fullWidth
                 variant="outlined"
-                placeholder="Paste your Spotify playlist URL here..."
+                placeholder={t('input.placeholder')}
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !loading && handleConvert()}
@@ -357,11 +457,11 @@ function App() {
                 {loading ? (
                   <>
                     <CircularProgress size={24} color="inherit" />
-                    Converting...
+                    {t('input.converting')}
                   </>
                 ) : (
                   <>
-                    Convert Playlist
+                    {t('input.convertButton')}
                     <Box component="span">✨</Box>
                   </>
                 )}
@@ -395,7 +495,7 @@ function App() {
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
               <Typography variant="h5" component="h2" display="flex" alignItems="center" gap={1}>
-                <span>🎶</span> Your Tracks
+                <span>🎶</span> {t('table.title')}
               </Typography>
               {rows.length > 0 && (
                 <Typography variant="body2" color="text.secondary" sx={{
@@ -404,7 +504,7 @@ function App() {
                   py: 0.5,
                   borderRadius: 4
                 }}>
-                  {rows.length} tracks
+                  {t('table.trackCount', { count: rows.length })}
                 </Typography>
               )}
             </Box>
@@ -413,9 +513,9 @@ function App() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell width="10%" sx={{ fontWeight: 'bold' }}>#</TableCell>
-                    <TableCell width="60%" sx={{ fontWeight: 'bold' }}>Track Name</TableCell>
-                    <TableCell width="30%" align="right" sx={{ fontWeight: 'bold' }}>Action</TableCell>
+                    <TableCell width="10%" sx={{ fontWeight: 'bold' }}>{t('table.headerNumber')}</TableCell>
+                    <TableCell width="60%" sx={{ fontWeight: 'bold' }}>{t('table.headerTrackName')}</TableCell>
+                    <TableCell width="30%" align="right" sx={{ fontWeight: 'bold' }}>{t('table.headerAction')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -424,10 +524,10 @@ function App() {
                       <TableCell colSpan={3} align="center" sx={{ py: 8 }}>
                         <Box fontSize="3rem" mb={2} sx={{ opacity: 0.5 }}>🎧</Box>
                         <Typography variant="h6" color="text.primary" gutterBottom>
-                          Your converted tracks will appear here
+                          {t('table.emptyTitle')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Paste a Spotify playlist link and click Convert
+                          {t('table.emptyHint')}
                         </Typography>
                       </TableCell>
                     </TableRow>
@@ -455,11 +555,11 @@ function App() {
                                 }
                               }}
                             >
-                              Listen
+                              {t('table.listenButton')}
                             </Button>
                           ) : (
                             <Typography variant="body2" color="error">
-                              {row.message || 'Not found'}
+                              {row.message || t('table.notFound')}
                             </Typography>
                           )}
                         </TableCell>
@@ -488,7 +588,7 @@ function App() {
         {/* Footer */}
         <Box textAlign="center" mt={6}>
           <Typography variant="body2" color="text.secondary">
-            Built with <Box component="span" color="error.main">♥</Box> for music lovers everywhere
+            <Trans i18nKey="footer.madeWith" components={{ heart: <Box component="span" sx={{ color: 'error.main' }} /> }} />
           </Typography>
         </Box>
       </Container>

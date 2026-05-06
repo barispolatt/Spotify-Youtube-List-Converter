@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "spotify": "Spotify",
+    "arrow": "→",
+    "youtube": "YouTube",
+    "subtitle": "Förvandla dina Spotify-spellistor till YouTube Music på sekunder. Snabbt, gratis och underbart enkelt."
+  },
+  "input": {
+    "placeholder": "Klistra in din Spotify-spellista-URL här...",
+    "convertButton": "Konvertera spellista",
+    "converting": "Konverterar..."
+  },
+  "progress": {
+    "searchingYouTube": "Söker på YouTube Music",
+    "complete": "{{pct}}% klart",
+    "remaining": "{{count}} återstående"
+  },
+  "status": {
+    "invalidUrl": "Ange en giltig Spotify-spellista-URL",
+    "analyzingPlaylist": "Analyserar din Spotify-spellista...",
+    "connectingYouTube": "Ansluter till YouTube-sökning...",
+    "emptyPlaylist": "Denna spellista verkar vara tom. Prova en annan spellista.",
+    "genericError": "Något gick fel. Försök igen.",
+    "backendError": "Servern returnerade fel {{status}}",
+    "done": "Klart! Hittade {{found}} av {{total}} låtar på YouTube Music."
+  },
+  "table": {
+    "title": "Dina låtar",
+    "trackCount": "{{count}} låtar",
+    "headerNumber": "#",
+    "headerTrackName": "Låtnamn",
+    "headerAction": "Åtgärd",
+    "emptyTitle": "Dina konverterade låtar visas här",
+    "emptyHint": "Klistra in en Spotify-spellista-länk och klicka på Konvertera",
+    "listenButton": "Lyssna",
+    "notFound": "Hittades inte"
+  },
+  "footer": {
+    "madeWith": "Skapad med <heart>♥</heart> för musikälskare överallt"
+  },
+  "language": {
+    "label": "Språk"
+  }
+}

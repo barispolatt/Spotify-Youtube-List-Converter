@@ -22,11 +22,11 @@ This document outlines the required fixes, architectural improvements, and poten
 - [x] ~~**Replace `yt-dlp` with Official YouTube Data API**~~: *(Cancelled) Using the official YouTube Data API introduces strict rate limits that would crash the app under heavy load. We are officially retaining `yt-dlp` to avoid quota exhaustion.*
 
 ### User Experience (UX)
-- [ ] **Spotify OAuth Integration**: Replace the hardcoded Spotify Client Credentials flow with an OAuth 2.0 flow. This would allow users to log in with their Spotify accounts and convert their private playlists.
-- [ ] **YouTube Account Integration**: Add Google/YouTube OAuth so the application can automatically create a new playlist directly in the user's YouTube account, rather than just outputting a list of links.
-- [ ] **Internationalization (i18n)**: Implement `react-i18next` to support multiple languages (e.g., English, Turkish, German) since there are already traces of Turkish in the codebase.
+- [x] ~~**Spotify OAuth Integration**~~: *(Cancelled) Adding OAuth would introduce login redirects, session/token storage, GDPR obligations, and a Spotify app review process — tripling backend complexity for a marginal benefit. The current Client Credentials flow already handles all public playlists. Users with private playlists can simply set them to Public in Spotify (2 clicks) before converting. Keeping the zero-login, paste-a-link UX is an intentional design choice for simplicity and user trust.*
+- [x] ~~**YouTube Account Integration**~~: *(Cancelled) Same rationale as Spotify OAuth — adding Google login would introduce OAuth redirects, consent screens, token storage, and GDPR obligations, breaking the zero-login UX that makes this tool simple and trustworthy. Users can open the output links directly in YouTube Music without needing to grant account access.*
+- [x] **Internationalization (i18n)**: Implemented `react-i18next` with browser language auto-detection supporting 6 languages: English, Turkish (Türkçe), German (Deutsch), Italian (Italiano), Spanish (Español), and Swedish (Svenska). All UI strings including error messages, progress indicators, and status alerts are fully translated.
 - [ ] **Dark/Light Mode Toggle**: Implement a theme toggle mechanism using MUI's theming capabilities.
 
 ### DevOps & Infrastructure
-- [ ] **Helm Charts**: Convert the raw Kubernetes YAML files in the `k8s/` directory into Helm charts for easier deployment, versioning, and environment-specific configurations.
+- [x] **Helm Charts**: Converted raw `k8s/` manifests into a Helm 3 chart (`helm/spotify-converter/`) with templated Deployments and Services, environment-specific values files (dev/prod), and `--atomic` deploys via CI. Includes security hardening: pinned CI action versions, tightened NodePort security group rules, restricted Lambda CORS methods. Old manifests archived to `k8s/legacy/`.
 - [ ] **CI/CD Pipeline Expansion**: Add automated testing (unit and integration tests) to the GitHub Actions pipeline to ensure stability before deployments.

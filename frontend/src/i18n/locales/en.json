@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "spotify": "Spotify",
+    "arrow": "→",
+    "youtube": "YouTube",
+    "subtitle": "Transform your Spotify playlists into YouTube Music in seconds. Fast, free, and beautifully simple."
+  },
+  "input": {
+    "placeholder": "Paste your Spotify playlist URL here...",
+    "convertButton": "Convert Playlist",
+    "converting": "Converting..."
+  },
+  "progress": {
+    "searchingYouTube": "Searching YouTube Music",
+    "complete": "{{pct}}% complete",
+    "remaining": "{{count}} remaining"
+  },
+  "status": {
+    "invalidUrl": "Please enter a valid Spotify playlist URL",
+    "analyzingPlaylist": "Analyzing your Spotify playlist...",
+    "connectingYouTube": "Connecting to YouTube search...",
+    "emptyPlaylist": "This playlist appears to be empty. Please try a different playlist.",
+    "genericError": "Something went wrong. Please try again.",
+    "backendError": "Backend returned {{status}}",
+    "done": "Done! Found {{found}} of {{total}} tracks on YouTube Music."
+  },
+  "table": {
+    "title": "Your Tracks",
+    "trackCount": "{{count}} tracks",
+    "headerNumber": "#",
+    "headerTrackName": "Track Name",
+    "headerAction": "Action",
+    "emptyTitle": "Your converted tracks will appear here",
+    "emptyHint": "Paste a Spotify playlist link and click Convert",
+    "listenButton": "Listen",
+    "notFound": "Not found"
+  },
+  "footer": {
+    "madeWith": "Built with <heart>♥</heart> for music lovers everywhere"
+  },
+  "language": {
+    "label": "Language"
+  }
+}

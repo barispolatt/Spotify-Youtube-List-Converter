@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spotify-converter.fullname" . }}-frontend
+  labels:
+    {{- include "spotify-converter.labels" . | nindent 4 }}
+    {{- include "spotify-converter.frontend.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "spotify-converter.frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "spotify-converter.frontend.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.frontend.healthCheck.path }}
+              port: {{ .Values.frontend.port }}
+            initialDelaySeconds: {{ .Values.frontend.healthCheck.livenessInitialDelay }}
+            periodSeconds: {{ .Values.frontend.healthCheck.livenessPeriod }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.frontend.healthCheck.path }}
+              port: {{ .Values.frontend.port }}
+            initialDelaySeconds: {{ .Values.frontend.healthCheck.readinessInitialDelay }}
+            periodSeconds: {{ .Values.frontend.healthCheck.readinessPeriod }}
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
