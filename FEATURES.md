@@ -18,8 +18,8 @@ This document outlines the required fixes, architectural improvements, and poten
 ## 🟢 Potential Updates & Features
 
 ### Architecture & Performance
-- [ ] **Real-time Progress Updates (WebSockets / SSE)**: Instead of blocking the frontend until all tracks are processed, implement Server-Sent Events (SSE) or WebSockets so the UI updates track-by-track as they are found on YouTube.
-- [ ] ~~**Replace `yt-dlp` with Official YouTube Data API**~~: *(Cancelled) Using the official YouTube Data API introduces strict rate limits that would crash the app under heavy load. We are officially retaining `yt-dlp` to avoid quota exhaustion.*
+- [x] **Real-time Progress Updates (WebSockets / SSE)**: Instead of blocking the frontend until all tracks are processed, implement Server-Sent Events (SSE) or WebSockets so the UI updates track-by-track as they are found on YouTube.
+- [x] ~~**Replace `yt-dlp` with Official YouTube Data API**~~: *(Cancelled) Using the official YouTube Data API introduces strict rate limits that would crash the app under heavy load. We are officially retaining `yt-dlp` to avoid quota exhaustion.*
 
 ### User Experience (UX)
 - [ ] **Spotify OAuth Integration**: Replace the hardcoded Spotify Client Credentials flow with an OAuth 2.0 flow. This would allow users to log in with their Spotify accounts and convert their private playlists.

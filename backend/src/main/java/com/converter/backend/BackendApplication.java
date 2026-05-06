@@ -128,8 +128,8 @@ public class BackendApplication {
                                 "url", result.url() != null ? result.url() : "",
                                 "status", result.status(),
                                 "message", result.message() != null ? result.message() : "");
-                        emitter.send(SseEmitter.event().name("track")
-                                .data(objectMapper.writeValueAsString(payload)));
+                        String json = objectMapper.writeValueAsString(payload);
+                        emitter.send(SseEmitter.event().name("track").data(json));
                     } catch (IOException e) {
                         emitter.completeWithError(e);
                     }
@@ -148,7 +148,8 @@ public class BackendApplication {
                     }
                 })
                 .exceptionally(ex -> {
-                    emitter.completeWithError(ex);
+                    Throwable cause = ex != null ? ex : new RuntimeException("Unknown error");
+                    emitter.completeWithError(cause);
                     return null;
                 });
 
