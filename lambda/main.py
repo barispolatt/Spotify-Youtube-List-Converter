@@ -24,6 +24,38 @@ def get_token():
     with urllib.request.urlopen(req) as res:
         return json.load(res)['access_token']
 
+def exchange_code(auth_code, redirect_uri):
+    client_id = os.environ.get('SPOTIFY_CLIENT_ID')
+    client_secret = os.environ.get('SPOTIFY_CLIENT_SECRET')
+    
+    if not client_id or not client_secret or client_id == "CHANGE_ME":
+        return None
+        
+    auth = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+    data = urllib.parse.urlencode({
+        'grant_type': 'authorization_code',
+        'code': auth_code,
+        'redirect_uri': redirect_uri
+    }).encode()
+    
+    req = urllib.request.Request(
+        "https://accounts.spotify.com/api/token",
+        data=data,
+        headers={
+            'Authorization': f'Basic {auth}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    )
+    try:
+        with urllib.request.urlopen(req) as res:
+            return json.load(res)['access_token']
+    except urllib.error.HTTPError as e:
+        print(f"Token exchange failed: {e.read().decode()}")
+        return None
+    except Exception as e:
+        print(f"Token exchange failed: {str(e)}")
+        return None
+
 def handler(event, context):
     # Handle OPTIONS preflight request for CORS
     # Note: Function URL handles CORS automatically, but we still return 200 for OPTIONS
@@ -35,6 +67,8 @@ def handler(event, context):
         # Get body data from frontend
         body = json.loads(event.get('body', '{}')) if isinstance(event.get('body'), str) else event.get('body', {})
         playlist_url = body.get('url')
+        auth_code = body.get('auth_code')
+        redirect_uri = body.get('redirect_uri')
         
         if not playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'URL is missing!'})}
@@ -43,8 +77,11 @@ def handler(event, context):
         if 'spotify.com/playlist/' not in playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'Invalid Spotify playlist URL. Please provide a valid playlist link.'})}
 
-        # Get Token (or None for Mock)
-        token = get_token()
+        # Get Token (OAuth if auth_code provided, otherwise fallback to Client Credentials/Mock)
+        token = exchange_code(auth_code, redirect_uri) if auth_code else get_token()
+        
+        if auth_code and not token:
+            return {'statusCode': 401, 'body': json.dumps({'error': 'Spotify authorization failed or expired. Please login again.'})}
         
         if token:
             # REAL MODE: Pull playlist songs from Spotify

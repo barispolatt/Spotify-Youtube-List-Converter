@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { LANGUAGES } from './i18n';
 import axios from 'axios';
@@ -35,6 +35,7 @@ import './App.css';
 
 const LAMBDA_URL = import.meta.env.VITE_LAMBDA_URL;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const SPOTIFY_CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 
 const darkTheme = createTheme({
   palette: {
@@ -235,11 +236,29 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  const [authCode, setAuthCode] = useState('');
   // SSE progress state
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamProgress, setStreamProgress] = useState({ current: 0, total: 0 });
   const readerRef = useRef(null);
   const rowsPerPage = 8;
+
+  // Handle Spotify OAuth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      setAuthCode(code);
+      // Remove code from URL to prevent reuse on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  const handleSpotifyLogin = () => {
+    const scopes = encodeURIComponent('playlist-read-private playlist-read-collaborative');
+    const redirectUri = encodeURIComponent(window.location.origin + '/');
+    window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${scopes}&redirect_uri=${redirectUri}`;
+  };
 
   // Parse raw SSE text chunks into individual event blocks.
   // A single chunk may contain multiple events separated by "\n\n".
@@ -273,7 +292,11 @@ function App() {
 
     try {
       // Step 1: Fetch track list from Lambda
-      const spotifyRes = await axios.post(LAMBDA_URL, { url });
+      const spotifyRes = await axios.post(LAMBDA_URL, { 
+        url,
+        auth_code: authCode,
+        redirect_uri: window.location.origin + '/'
+      });
       const trackList = spotifyRes.data;
 
       if (trackList && trackList.error) {
@@ -358,7 +381,15 @@ function App() {
       }
     } catch (error) {
       console.error(error);
-      setStatus('error:' + t('status.genericError'));
+      let errMsg = t('status.genericError');
+      if (error.response && error.response.data && error.response.data.error) {
+        errMsg = error.response.data.error;
+        // If unauthorized (invalid/expired code), clear code so user can login again
+        if (error.response.status === 401) {
+          setAuthCode('');
+        }
+      }
+      setStatus('error:' + errMsg);
       setIsStreaming(false);
     } finally {
       setLoading(false);
@@ -440,32 +471,53 @@ function App() {
                   startAdornment: <Box component="span" sx={{ mr: 1 }}>🔗</Box>
                 }}
               />
-              <Button
-                id="convert-btn"
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={handleConvert}
-                disabled={loading || !url.trim()}
-                sx={{
-                  minWidth: { xs: '100%', sm: 200 },
-                  height: 56,
-                  display: 'flex',
-                  gap: 1
-                }}
-              >
-                {loading ? (
-                  <>
-                    <CircularProgress size={24} color="inherit" />
-                    {t('input.converting')}
-                  </>
-                ) : (
-                  <>
-                    {t('input.convertButton')}
-                    <Box component="span">✨</Box>
-                  </>
-                )}
-              </Button>
+              {(!authCode && SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_ID !== 'CHANGE_ME') ? (
+                <Button
+                  id="login-btn"
+                  variant="contained"
+                  size="large"
+                  onClick={handleSpotifyLogin}
+                  sx={{
+                    minWidth: { xs: '100%', sm: 200 },
+                    height: 56,
+                    background: '#1db954',
+                    color: 'white',
+                    display: 'flex',
+                    gap: 1,
+                    '&:hover': { background: '#1ed760' }
+                  }}
+                >
+                  <Box component="span">🎧</Box>
+                  Login with Spotify
+                </Button>
+              ) : (
+                <Button
+                  id="convert-btn"
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  onClick={handleConvert}
+                  disabled={loading || !url.trim()}
+                  sx={{
+                    minWidth: { xs: '100%', sm: 200 },
+                    height: 56,
+                    display: 'flex',
+                    gap: 1
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <CircularProgress size={24} color="inherit" />
+                      {t('input.converting')}
+                    </>
+                  ) : (
+                    <>
+                      {t('input.convertButton')}
+                      <Box component="span">✨</Box>
+                    </>
+                  )}
+                </Button>
+              )}
             </Stack>
           </CardContent>
         </Card>

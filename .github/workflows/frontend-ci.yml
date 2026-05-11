@@ -45,6 +45,7 @@ jobs:
         docker build \
           --build-arg VITE_LAMBDA_URL=${{ vars.VITE_LAMBDA_URL }} \
           --build-arg VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL }} \
+          --build-arg VITE_SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
