@@ -315,7 +315,7 @@ function App() {
       // Step 2: Open SSE stream to backend
       setStatus('loading:' + t('status.connectingYouTube'));
 
-      const response = await fetch(`${BACKEND_URL}/stream`, {
+      const response = await fetch(`${BACKEND_URL}/api/v1/youtube/search/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(trackList),
