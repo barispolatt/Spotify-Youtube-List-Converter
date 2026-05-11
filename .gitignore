@@ -63,12 +63,15 @@ terraform.rc
 k8s/secrets/
 k8s/*-secret.yaml
 
+terraform/enviroments/dev/spotify_lambda.zip
 *.tar
+*.zip
 
 # SSH Keys
 *.pem
 *.pub
 converter-project-key
 converter-project-key.pub
+
 LEARNINGS.md
 project_comprehensive_guide.md

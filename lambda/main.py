@@ -148,7 +148,24 @@ def handler(event, context):
             'statusCode': 200,
             'body': json.dumps(tracks)
         }
+    except urllib.error.HTTPError as e:
+        error_msg = e.read().decode()
+        print(f"Spotify API Error {e.code}: {error_msg}")
+        # Parse the JSON if possible
+        try:
+            error_json = json.loads(error_msg)
+            if 'error' in error_json and 'message' in error_json['error']:
+                error_msg = error_json['error']['message']
+        except:
+            pass
+        return {
+            'statusCode': e.code,
+            'body': json.dumps({'error': f"Spotify Error: {error_msg}"})
+        }
     except Exception as e:
+        import traceback
+        print("ERROR IN LAMBDA POST HANDLER:")
+        traceback.print_exc()
         return {
             'statusCode': 500, 
             'body': json.dumps({'error': str(e)})
