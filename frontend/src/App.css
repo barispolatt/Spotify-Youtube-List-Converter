@@ -271,11 +271,52 @@ body::after {
 }
 
 .logo-container img {
-  width: 180px;
+  width: 130px;
   /* Adjust this value to make the logo larger or smaller */
   height: auto;
   /* Ensures the logo keeps its original proportions */
   object-fit: contain;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   HERO SECTION TITLE
+   ═══════════════════════════════════════════════════════════════════ */
+.hero-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.text-spotify {
+  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(29, 185, 84, 0.4);
+}
+
+.text-youtube {
+  background: linear-gradient(135deg, #FF0000 0%, #ff4d4d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+}
+
+.hero-arrow {
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulseArrow 3s infinite alternate;
+}
+
+@keyframes pulseArrow {
+  0% { color: rgba(255, 255, 255, 0.3); transform: translateX(-3px); }
+  100% { color: rgba(255, 255, 255, 0.7); transform: translateX(3px); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
