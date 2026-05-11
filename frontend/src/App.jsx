@@ -435,9 +435,6 @@ function App() {
         ))}
       </div>
 
-      {/* Horizontal glow accents */}
-      <div className="glow-line glow-line--green" />
-      <div className="glow-line glow-line--red" />
 
       <Container maxWidth="md" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
         {/* Top bar: Logo + Language Switcher */}

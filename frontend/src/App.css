@@ -37,9 +37,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(29, 185, 84, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(255, 0, 0, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 60% at 10% 90%, rgba(29, 185, 84, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 10%, rgba(255, 0, 0, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
   pointer-events: none;
   z-index: -3;
 }
@@ -55,9 +55,9 @@ body::after {
   width: 160%;
   height: 160%;
   background:
-    radial-gradient(circle 400px at 25% 25%, rgba(29, 185, 84, 0.10) 0%, transparent 70%),
-    radial-gradient(circle 350px at 75% 75%, rgba(255, 0, 0, 0.07) 0%, transparent 70%),
-    radial-gradient(circle 300px at 60% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 60%);
+    radial-gradient(circle 400px at 25% 25%, rgba(29, 185, 84, 0.20) 0%, transparent 70%),
+    radial-gradient(circle 350px at 75% 75%, rgba(255, 0, 0, 0.16) 0%, transparent 70%),
+    radial-gradient(circle 300px at 60% 20%, rgba(99, 102, 241, 0.14) 0%, transparent 60%);
   animation: orbDrift 25s ease-in-out infinite;
   pointer-events: none;
   z-index: -2;
@@ -94,8 +94,8 @@ body::after {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 80px 80px;
   pointer-events: none;
   z-index: 0;
@@ -264,51 +264,6 @@ body::after {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   LAYER 5: Glow lines — subtle horizontal accents
-   ═══════════════════════════════════════════════════════════════════ */
-.glow-line {
-  position: fixed;
-  height: 1px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-line--green {
-  top: 30%;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(29, 185, 84, 0.20) 20%,
-      rgba(29, 185, 84, 0.05) 50%,
-      transparent 80%);
-  animation: glowLinePulse 8s ease-in-out infinite;
-}
-
-.glow-line--red {
-  top: 70%;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(90deg,
-      transparent 20%,
-      rgba(255, 0, 0, 0.05) 50%,
-      rgba(255, 0, 0, 0.15) 80%,
-      transparent 100%);
-  animation: glowLinePulse 10s ease-in-out 3s infinite;
-}
-
-@keyframes glowLinePulse {
-
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
 
 /* ═══════════════════════════════════════════════════════════════════
    LOGO
