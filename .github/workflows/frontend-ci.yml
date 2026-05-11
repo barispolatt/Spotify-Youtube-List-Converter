@@ -8,9 +8,10 @@ on:
       - '.github/workflows/frontend-ci.yml'
       - 'helm/**'
 
-concurrency: 
-  group: frontend-deploy
-  cancel-in-progress: true
+concurrency:
+  # Shared with backend-ci — both workflows deploy the same Helm release,
+  # so they MUST be serialized. The second deploy queues until the first finishes.
+  group: helm-deploy
   
 env:
   AWS_REGION: us-east-1
