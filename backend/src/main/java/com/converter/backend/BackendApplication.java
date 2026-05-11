@@ -174,12 +174,37 @@ public class BackendApplication {
                     "--flat-playlist",
                     "--no-warnings",
                     "--ignore-errors",
+                    "--no-interactive",
+                    "--socket-timeout", "10",
                     query);
+            
+            // Discard stderr to prevent buffer fill deadlocks
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
 
             Process p = pb.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String videoId = reader.readLine();
-            p.waitFor();
+            
+            // Read output asynchronously with a strict 15-second timeout
+            CompletableFuture<String> readTask = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return reader.readLine();
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+            
+            String videoId = null;
+            try {
+                videoId = readTask.get(15, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                p.destroyForcibly();
+                return new SearchResult(query, null, "error", "Search timed out (15s limit)");
+            }
+            
+            // Cleanup the process
+            if (!p.waitFor(5, TimeUnit.SECONDS)) {
+                p.destroyForcibly();
+            }
 
             if (videoId != null && !videoId.trim().isEmpty()) {
                 String youtubeUrl = "https://music.youtube.com/watch?v=" + videoId.trim();
