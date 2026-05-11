@@ -5,6 +5,9 @@
 
 backend:
   replicas: 1
+  image:
+    # Set dynamically by CI via --set backend.image.repository=<ECR_REGISTRY>/spotify-youtube-backend
+    repository: ""
   resources:
     limits:
       memory: "1024Mi"
@@ -17,6 +20,9 @@ backend:
 
 frontend:
   replicas: 1
+  image:
+    # Set dynamically by CI via --set frontend.image.repository=<ECR_REGISTRY>/spotify-youtube-frontend
+    repository: ""
   resources:
     limits:
       memory: "100Mi"

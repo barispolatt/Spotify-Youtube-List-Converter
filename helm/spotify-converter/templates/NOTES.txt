@@ -14,5 +14,13 @@ Frontend:
 To check pod status:
   kubectl get pods -l "app.kubernetes.io/instance={{ .Release.Name }}"
 
+Quick health check:
+  curl -s http://localhost:{{ .Values.backend.service.nodePort }}{{ .Values.backend.healthCheck.path }}
+  curl -s http://localhost:{{ .Values.frontend.service.nodePort }}{{ .Values.frontend.healthCheck.path }}
+
+To view logs:
+  kubectl logs -l "app={{ include "spotify-converter.fullname" . }}-backend" --tail=50
+  kubectl logs -l "app={{ include "spotify-converter.fullname" . }}-frontend" --tail=50
+
 To rollback:
   helm rollback {{ .Release.Name }} <REVISION>

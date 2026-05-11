@@ -39,16 +39,29 @@ service codedeploy-agent start
 
 # 4. K3s (Lite Kubernetes) installation
 echo "K3s installing..."
-# Traefik (Ingress Controller) and Metrics Server closing
+# Traefik (Ingress Controller) and Metrics Server disabled:
+# - Traefik is not needed on a single-node cluster using NodePort services.
+#   Traffic access control is enforced via AWS Security Groups instead.
+#   Re-enable if you need TLS termination or path-based routing in-cluster.
+# - Metrics Server disabled to save memory on t3a.small (2 GiB RAM).
 # K3S_KUBECONFIG_MODE="644": to use kubectl without sudo
 curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s - server \
   --disable traefik \
   --disable metrics-server \
   --node-name k3s-master
 
-# wait for K3s
+# wait for K3s (poll until node is Ready, timeout after 120s)
 echo "Waiting for K3s to be ready..."
-sleep 45
+SECONDS=0
+until k3s kubectl get nodes 2>/dev/null | grep -q " Ready"; do
+  if [ $SECONDS -ge 120 ]; then
+    echo "ERROR: K3s did not become ready within 120 seconds"
+    exit 1
+  fi
+  echo "  K3s not ready yet... (${SECONDS}s elapsed)"
+  sleep 5
+done
+echo "K3s is ready (took ${SECONDS}s)"
 
 # set default kubeconfig file for ubuntu user
 mkdir -p /home/ubuntu/.kube
@@ -64,7 +77,7 @@ echo "Helm version: $(helm version --short)"
 echo "Define alias for K3s"
 echo "alias k=kubectl" >> /home/ubuntu/.bashrc
 
-# 5. Configure ECR credentials for K3s
+# 6. Configure ECR credentials for K3s
 echo "Configuring ECR credentials..."
 
 # Get AWS account ID and region from instance metadata
@@ -83,9 +96,9 @@ k3s kubectl create secret docker-registry regcred \
 # Patch default service account to use the ECR secret
 k3s kubectl patch serviceaccount default -p '{"imagePullSecrets": [{"name": "regcred"}]}'
 
-# 6. Create cron job to refresh ECR token (expires every 12 hours)
+# 7. Create cron job to refresh ECR token (expires every 12 hours)
 echo "Setting up ECR token refresh cron job..."
-cat > /home/ubuntu/refresh-ecr-token.sh << 'REFRESH_SCRIPT'
+cat > /opt/refresh-ecr-token.sh << 'REFRESH_SCRIPT'
 #!/bin/bash
 AWS_REGION=$(curl -s -H "X-aws-ec2-metadata-token: $(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")" http://169.254.169.254/latest/meta-data/placement/region)
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
@@ -97,10 +110,11 @@ k3s kubectl create secret docker-registry regcred \
   --dry-run=client -o yaml | k3s kubectl apply -f -
 REFRESH_SCRIPT
 
-chmod +x /home/ubuntu/refresh-ecr-token.sh
-chown ubuntu:ubuntu /home/ubuntu/refresh-ecr-token.sh
+# Script owned by root, only root can modify/execute — prevents privilege escalation
+chmod 700 /opt/refresh-ecr-token.sh
+chown root:root /opt/refresh-ecr-token.sh
 
-# Run every 10 hours to refresh before 12-hour expiry
-echo "0 */10 * * * /home/ubuntu/refresh-ecr-token.sh >> /var/log/ecr-refresh.log 2>&1" | crontab -
+# Run every 10 hours to refresh before 12-hour expiry (root's crontab)
+echo "0 */10 * * * /opt/refresh-ecr-token.sh >> /var/log/ecr-refresh.log 2>&1" | crontab -
 
 echo "Installation complete!"

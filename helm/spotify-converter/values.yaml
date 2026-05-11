@@ -13,6 +13,9 @@ backend:
   replicas: 1
   port: 8080
   service:
+    # ⚠ SECURITY: NodePort exposes this port directly on the host's public IP.
+    # Ensure your AWS Security Group restricts 30080 to trusted sources only
+    # (e.g., your load balancer or VPN CIDR). Do NOT open 30000-32767 to 0.0.0.0/0.
     type: NodePort
     nodePort: 30080
   resources:
@@ -39,8 +42,10 @@ frontend:
     tag: "latest"      # Set by CI
     pullPolicy: Always
   replicas: 1
-  port: 80
+  port: 8080
   service:
+    # ⚠ SECURITY: NodePort exposes this port directly on the host's public IP.
+    # Ensure your AWS Security Group restricts 30081 to trusted sources only.
     type: NodePort
     nodePort: 30081
   resources:

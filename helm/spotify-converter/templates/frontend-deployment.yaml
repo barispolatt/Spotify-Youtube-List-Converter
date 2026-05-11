@@ -15,10 +15,16 @@ spec:
       labels:
         {{- include "spotify-converter.frontend.selectorLabels" . | nindent 8 }}
     spec:
+      imagePullSecrets:
+        - name: regcred
       containers:
         - name: frontend
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101       # nginx user in official nginx image
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: {{ .Values.frontend.port }}
               protocol: TCP
@@ -28,11 +34,13 @@ spec:
               port: {{ .Values.frontend.port }}
             initialDelaySeconds: {{ .Values.frontend.healthCheck.livenessInitialDelay }}
             periodSeconds: {{ .Values.frontend.healthCheck.livenessPeriod }}
+            failureThreshold: {{ .Values.frontend.healthCheck.livenessFailureThreshold | default 3 }}
           readinessProbe:
             httpGet:
               path: {{ .Values.frontend.healthCheck.path }}
               port: {{ .Values.frontend.port }}
             initialDelaySeconds: {{ .Values.frontend.healthCheck.readinessInitialDelay }}
             periodSeconds: {{ .Values.frontend.healthCheck.readinessPeriod }}
+            failureThreshold: {{ .Values.frontend.healthCheck.readinessFailureThreshold | default 3 }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}

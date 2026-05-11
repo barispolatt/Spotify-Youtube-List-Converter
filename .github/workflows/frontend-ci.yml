@@ -10,6 +10,7 @@ on:
 
 concurrency: 
   group: helm-deploy
+  cancel-in-progress: true
   
 env:
   AWS_REGION: us-east-1
@@ -41,8 +42,8 @@ jobs:
       run: |
         cd frontend
         docker build \
-          --build-arg VITE_LAMBDA_URL=${{ secrets.VITE_LAMBDA_URL }} \
-          --build-arg VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }} \
+          --build-arg VITE_LAMBDA_URL=${{ vars.VITE_LAMBDA_URL }} \
+          --build-arg VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL }} \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -64,13 +65,23 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
+        SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+        SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+        CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
         key: ${{ secrets.EC2_SSH_KEY }}
-        envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY
+        envs: ECR_REGISTRY,IMAGE_TAG,ECR_REPOSITORY,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET,CORS_ALLOWED_ORIGINS
         script: |
-          # Deploy via Helm (atomic: auto-rollback on failure)
+          # 1. Create/update backend secrets (idempotent via --dry-run + apply)
+          sudo k3s kubectl create secret generic backend-secrets \
+            --from-literal=SPOTIFY_CLIENT_ID="$SPOTIFY_CLIENT_ID" \
+            --from-literal=SPOTIFY_CLIENT_SECRET="$SPOTIFY_CLIENT_SECRET" \
+            --from-literal=CORS_ALLOWED_ORIGINS="$CORS_ALLOWED_ORIGINS" \
+            --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+
+          # 2. Deploy via Helm (atomic: auto-rollback on failure)
           sudo helm upgrade --install spotify-converter \
             /home/ubuntu/spotify-project/helm/spotify-converter/ \
             -f /home/ubuntu/spotify-project/helm/spotify-converter/values-dev.yaml \

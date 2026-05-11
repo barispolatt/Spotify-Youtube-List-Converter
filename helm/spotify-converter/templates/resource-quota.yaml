@@ -1,0 +1,35 @@
+{{- /*
+  Resource controls for a single-node K3s cluster (t3a.small: 2 GiB RAM, 2 vCPU).
+  Prevents runaway pods from starving the node.
+*/ -}}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ include "spotify-converter.fullname" . }}-limit-range
+  labels:
+    {{- include "spotify-converter.labels" . | nindent 4 }}
+spec:
+  limits:
+    # Default limits applied to containers that don't specify their own
+    - default:
+        memory: "512Mi"
+        cpu: "500m"
+      defaultRequest:
+        memory: "64Mi"
+        cpu: "50m"
+      type: Container
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ include "spotify-converter.fullname" . }}-resource-quota
+  labels:
+    {{- include "spotify-converter.labels" . | nindent 4 }}
+spec:
+  hard:
+    # Cap total namespace resource consumption to protect the node
+    requests.cpu: "2"
+    requests.memory: "1536Mi"
+    limits.cpu: "4"
+    limits.memory: "2048Mi"
+    pods: "10"

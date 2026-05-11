@@ -16,7 +16,13 @@ RUN apt-get update && apt-get install -y python3 curl && \
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
+# Run as non-root user (matches Helm securityContext runAsUser: 1000)
+RUN groupadd -r appgroup && useradd -r -g appgroup -u 1000 appuser && \
+    chown -R appuser:appgroup /app
+
 # JVM settings for t3.small (2GB RAM)
 ENV JAVA_OPTS="-Xmx768m -Xms512m"
+
+USER 1000
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
