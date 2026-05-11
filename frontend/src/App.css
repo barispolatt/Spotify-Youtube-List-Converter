@@ -326,7 +326,6 @@ body::after {
 }
 
 .stripe-word {
-  color: rgba(255, 255, 255, 0.3);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default;
   position: relative;
@@ -340,6 +339,15 @@ body::after {
   opacity: 0;
   transition: opacity 0.4s ease;
   z-index: -1;
+}
+
+/* Base Pale Colors */
+.stripe-spotify {
+  color: rgba(29, 185, 84, 0.4);
+}
+
+.stripe-youtube {
+  color: rgba(255, 0, 0, 0.4);
 }
 
 /* Hover Effects */
