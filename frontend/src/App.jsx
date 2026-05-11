@@ -447,18 +447,16 @@ function App() {
         </Box>
 
         {/* Hero Section */}
-        <Box textAlign="center" mb={7} position="relative">
-          {/* Subtle blurred ambient aura behind the text */}
-          <div className="hero-aura"></div>
-
+        <Box textAlign="center" mb={7} className="hero-wrapped-container">
           <Typography 
-            variant="h2" 
+            variant="h1" 
             component="h1" 
             fontWeight={900} 
-            gutterBottom 
-            className="hero-title shimmer-text"
+            className="hero-wrapped-title"
           >
-            Seamlessly migrate from Spotify to YouTube.
+            <Box component="span" display="block">{t('hero.spotify', 'Spotify')}</Box>
+            <Box component="span" display="block" className="hero-wrapped-slash">/</Box>
+            <Box component="span" display="block">{t('hero.youtube', 'YouTube')}</Box>
           </Typography>
           <Typography 
             variant="h6" 
@@ -470,8 +468,7 @@ function App() {
               fontWeight: 400,
               lineHeight: 1.6,
               letterSpacing: '0.02em',
-              position: 'relative',
-              zIndex: 2
+              mt: 4
             }}
           >
             {t('hero.subtitle')}
