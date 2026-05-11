@@ -9,7 +9,7 @@ on:
       - 'helm/**'
 
 concurrency: 
-  group: helm-deploy
+  group: backend-deploy
   cancel-in-progress: true
 
 env:
@@ -79,11 +79,13 @@ jobs:
             --dry-run=client -o yaml | sudo k3s kubectl apply -f -
 
           # 2. Deploy via Helm (atomic: auto-rollback on failure)
+          # Both repos must be set — values-dev.yaml has empty defaults
           sudo helm upgrade --install spotify-converter \
             /home/ubuntu/spotify-project/helm/spotify-converter/ \
             -f /home/ubuntu/spotify-project/helm/spotify-converter/values-dev.yaml \
             --set backend.image.repository=$ECR_REGISTRY/$ECR_REPOSITORY \
             --set backend.image.tag=$IMAGE_TAG \
+            --set frontend.image.repository=$ECR_REGISTRY/spotify-youtube-frontend \
             --kubeconfig /etc/rancher/k3s/k3s.yaml \
             --atomic \
             --timeout 5m
