@@ -112,8 +112,10 @@ def handler(event, context):
             if not playlist_id:
                 return {'statusCode': 400, 'body': json.dumps({'error': 'Could not extract playlist ID from URL.'})}
 
+            print(f"ATTEMPTING TO FETCH PLAYLIST ID: {playlist_id}")
+
             req = urllib.request.Request(
-                f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks?limit=50&fields=items(track(name,artists(name)))",
+                f"https://api.spotify.com/v1/playlists/{playlist_id}/items?limit=50&fields=items(track(name,artists(name)))",
                 headers={'Authorization': f'Bearer {token}'}
             )
             

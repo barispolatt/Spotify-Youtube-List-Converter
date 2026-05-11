@@ -259,7 +259,8 @@ function App() {
   }, []);
 
   const handleSpotifyLogin = () => {
-    const scopes = encodeURIComponent('playlist-read-private playlist-read-collaborative');
+    // We add user-read-private so Spotify can determine the user's market region (prevents 403 errors)
+    const scopes = encodeURIComponent('playlist-read-private playlist-read-collaborative user-read-private');
     const redirectUri = encodeURIComponent(LAMBDA_URL);
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${scopes}&redirect_uri=${redirectUri}`;
   };
