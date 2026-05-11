@@ -115,18 +115,20 @@ def handler(event, context):
             print(f"ATTEMPTING TO FETCH PLAYLIST ID: {playlist_id}")
 
             req = urllib.request.Request(
-                f"https://api.spotify.com/v1/playlists/{playlist_id}/items?limit=50&fields=items(track(name,artists(name)))",
+                f"https://api.spotify.com/v1/playlists/{playlist_id}/items?limit=50",
                 headers={'Authorization': f'Bearer {token}'}
             )
             
             tracks = []
             with urllib.request.urlopen(req) as res:
                 data = json.load(res)
-                for item in data['items']:
-                    if item.get('track'):
-                        track = item['track']
-                        artist_name = track['artists'][0]['name'] if track['artists'] else "Unknown"
-                        tracks.append(f"{artist_name} - {track['name']}")
+                print(f"RAW DATA FETCHED: {json.dumps(data)}")
+                for list_item in data.get('items', []):
+                    # Spotify /tracks uses 'track', /items uses 'item'
+                    track_data = list_item.get('track') or list_item.get('item')
+                    if track_data and track_data.get('name'):
+                        artist_name = track_data['artists'][0]['name'] if track_data.get('artists') else "Unknown"
+                        tracks.append(f"{artist_name} - {track_data['name']}")
         else:
             # MOCK MODE: Return static data
             print("RETURNING MOCK DATA")
