@@ -174,7 +174,6 @@ public class BackendApplication {
                     "--flat-playlist",
                     "--no-warnings",
                     "--ignore-errors",
-                    "--no-interactive",
                     "--socket-timeout", "10",
                     query);
             
