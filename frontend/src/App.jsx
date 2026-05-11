@@ -447,28 +447,42 @@ function App() {
         </Box>
 
         {/* Hero Section */}
-        <Box textAlign="center" mb={7} className="hero-wrapped-container">
+        <Box textAlign="center" mb={7} className="hero-stripe-container">
+          
+          {/* Pill Tag */}
+          <Box display="flex" justifyContent="center" mb={3}>
+            <div className="hero-pill">
+              <span className="hero-pill-icon">✨</span>
+              <span className="hero-pill-text">{t('hero.pill', 'Fast, free, and completely limitless')}</span>
+            </div>
+          </Box>
+
           <Typography 
-            variant="h1" 
+            variant="h2" 
             component="h1" 
-            fontWeight={900} 
-            className="hero-wrapped-title"
+            fontWeight={800} 
+            className="hero-stripe-title"
           >
-            <Box component="span" display="block">{t('hero.spotify', 'Spotify')}</Box>
-            <Box component="span" display="block" className="hero-wrapped-slash">/</Box>
-            <Box component="span" display="block">{t('hero.youtube', 'YouTube')}</Box>
+            <span className="stripe-word stripe-spotify">{t('hero.spotify', 'Spotify')}</span>
+            <span className="stripe-arrow">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <span className="stripe-word stripe-youtube">{t('hero.youtube', 'YouTube')}</span>
           </Typography>
+          
           <Typography 
             variant="h6" 
             sx={{ 
               maxWidth: 650, 
               mx: 'auto', 
               fontSize: { xs: '1.1rem', sm: '1.25rem' },
-              color: 'rgba(255, 255, 255, 0.7)',
+              color: 'rgba(255, 255, 255, 0.5)',
               fontWeight: 400,
               lineHeight: 1.6,
-              letterSpacing: '0.02em',
-              mt: 4
+              letterSpacing: '0.01em',
+              mt: 3
             }}
           >
             {t('hero.subtitle')}
