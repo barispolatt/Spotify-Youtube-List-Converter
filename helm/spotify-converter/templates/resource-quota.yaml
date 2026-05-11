@@ -27,9 +27,12 @@ metadata:
     {{- include "spotify-converter.labels" . | nindent 4 }}
 spec:
   hard:
-    # Cap total namespace resource consumption to protect the node
-    requests.cpu: "2"
-    requests.memory: "1536Mi"
-    limits.cpu: "4"
-    limits.memory: "2048Mi"
+    # Cap total namespace resource consumption to protect the node.
+    # Must accommodate rolling updates (old + new pod running simultaneously):
+    #   Normal:  backend(1Gi) + frontend(100Mi) ≈ 1.1Gi
+    #   Rolling: 2×backend(2Gi) + frontend(100Mi) ≈ 2.1Gi
+    requests.cpu: "3"
+    requests.memory: "2Gi"
+    limits.cpu: "6"
+    limits.memory: "3Gi"
     pods: "10"
