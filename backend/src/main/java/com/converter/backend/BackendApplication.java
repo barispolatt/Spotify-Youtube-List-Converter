@@ -85,8 +85,9 @@ public class BackendApplication {
     // update the progress bar in real-time without waiting for all results.
     @PostMapping(value = "/search/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter searchTracksStream(@RequestBody List<String> queries) {
-        // 5-minute timeout — generous for very large playlists
-        SseEmitter emitter = new SseEmitter(300_000L);
+        // 60-minute timeout to allow massive playlists (e.g. 1000 songs) to finish
+        // converting without the server abruptly closing the connection.
+        SseEmitter emitter = new SseEmitter(3_600_000L);
 
         if (queries == null || queries.isEmpty()) {
             try {
