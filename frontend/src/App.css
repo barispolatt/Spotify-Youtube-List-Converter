@@ -61,6 +61,7 @@ body::after {
   animation: orbDrift 25s ease-in-out infinite;
   pointer-events: none;
   z-index: -2;
+  will-change: transform;
 }
 
 @keyframes orbDrift {
@@ -99,8 +100,6 @@ body::after {
   background-size: 80px 80px;
   pointer-events: none;
   z-index: 0;
-  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 20%, transparent 70%);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -121,6 +120,7 @@ body::after {
   border-radius: 50%;
   opacity: 0;
   animation: particleFloat linear infinite;
+  will-change: transform, opacity;
 }
 
 /* Green particles (Spotify) */
