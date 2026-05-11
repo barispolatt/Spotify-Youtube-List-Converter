@@ -51,10 +51,9 @@ public class BackendApplication {
         return new CorsFilter(source);
     }
 
-    // Scale thread pool dynamically based on environment (available processors) to
-    // improve performance. Min 20 for I/O-bound yt-dlp processes on t3a.small.
-    private final ExecutorService executor = Executors.newFixedThreadPool(
-            Math.max(20, Runtime.getRuntime().availableProcessors() * 2));
+    // Reduced thread pool size to 5 to prevent out-of-memory (OOM) crashes
+    // when spawning multiple memory-heavy yt-dlp processes on a t3a.small instance.
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
 
     @PreDestroy
     public void cleanup() {
