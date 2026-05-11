@@ -447,21 +447,18 @@ function App() {
         </Box>
 
         {/* Hero Section */}
-        <Box textAlign="center" mb={7}>
+        <Box textAlign="center" mb={7} position="relative">
+          {/* Subtle blurred ambient aura behind the text */}
+          <div className="hero-aura"></div>
+
           <Typography 
             variant="h2" 
             component="h1" 
             fontWeight={900} 
             gutterBottom 
-            className="hero-title"
+            className="hero-title shimmer-text"
           >
-            <span className="text-spotify">{t('hero.spotify')}</span>
-            <span className="hero-arrow">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <span className="text-youtube">{t('hero.youtube')}</span>
+            Seamlessly migrate from Spotify to YouTube.
           </Typography>
           <Typography 
             variant="h6" 
@@ -472,7 +469,9 @@ function App() {
               color: 'rgba(255, 255, 255, 0.7)',
               fontWeight: 400,
               lineHeight: 1.6,
-              letterSpacing: '0.02em'
+              letterSpacing: '0.02em',
+              position: 'relative',
+              zIndex: 2
             }}
           >
             {t('hero.subtitle')}
