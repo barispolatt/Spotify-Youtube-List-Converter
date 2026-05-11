@@ -58,10 +58,8 @@ body::after {
     radial-gradient(circle 400px at 25% 25%, rgba(29, 185, 84, 0.20) 0%, transparent 70%),
     radial-gradient(circle 350px at 75% 75%, rgba(255, 0, 0, 0.16) 0%, transparent 70%),
     radial-gradient(circle 300px at 60% 20%, rgba(99, 102, 241, 0.14) 0%, transparent 60%);
-  animation: orbDrift 25s ease-in-out infinite;
   pointer-events: none;
   z-index: -2;
-  will-change: transform;
 }
 
 @keyframes orbDrift {
@@ -118,9 +116,7 @@ body::after {
   width: 3px;
   height: 3px;
   border-radius: 50%;
-  opacity: 0;
-  animation: particleFloat linear infinite;
-  will-change: transform, opacity;
+  opacity: 0.5;
 }
 
 /* Green particles (Spotify) */
