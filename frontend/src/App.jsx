@@ -243,20 +243,24 @@ function App() {
   const readerRef = useRef(null);
   const rowsPerPage = 8;
 
-  // Handle Spotify OAuth callback
+  // Handle Spotify OAuth callback (from Lambda proxy)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      setAuthCode(code);
-      // Remove code from URL to prevent reuse on refresh
+    const token = params.get('token');
+    const error = params.get('error');
+    
+    if (token) {
+      setAuthCode(token); // Using authCode state to store the actual access token
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error) {
+      setStatus('error:Spotify Login Failed: ' + error);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
   const handleSpotifyLogin = () => {
     const scopes = encodeURIComponent('playlist-read-private playlist-read-collaborative');
-    const redirectUri = encodeURIComponent(window.location.origin + '/');
+    const redirectUri = encodeURIComponent(LAMBDA_URL);
     window.location.href = `https://accounts.spotify.com/authorize?response_type=code&client_id=${SPOTIFY_CLIENT_ID}&scope=${scopes}&redirect_uri=${redirectUri}`;
   };
 
@@ -291,11 +295,10 @@ function App() {
     setPage(1);
 
     try {
-      // Step 1: Fetch track list from Lambda
+      // Step 1: Fetch track list from Lambda using the access token we got from the proxy
       const spotifyRes = await axios.post(LAMBDA_URL, { 
         url,
-        auth_code: authCode,
-        redirect_uri: window.location.origin + '/'
+        token: authCode
       });
       const trackList = spotifyRes.data;
 

@@ -62,13 +62,37 @@ def handler(event, context):
     http_method = event.get('requestContext', {}).get('http', {}).get('method', '')
     if http_method == 'OPTIONS':
         return {'statusCode': 200, 'body': ''}
+        
+    # --- HTTPS PROXY FOR SPOTIFY OAUTH ---
+    # Spotify requires an HTTPS redirect URI. Since our EC2 frontend is HTTP,
+    # we use this Lambda's HTTPS URL as the redirect URI.
+    if http_method == 'GET':
+        query = event.get('queryStringParameters', {})
+        code = query.get('code')
+        error = query.get('error')
+        
+        frontend_url = 'http://3.227.18.154:30081/'
+        
+        if error:
+            return {'statusCode': 302, 'headers': {'Location': f"{frontend_url}?error={error}"}}
+            
+        if code:
+            lambda_url = f"https://{event['requestContext']['domainName']}/"
+            token = exchange_code(code, lambda_url)
+            
+            if token:
+                return {'statusCode': 302, 'headers': {'Location': f"{frontend_url}?token={token}"}}
+            else:
+                return {'statusCode': 302, 'headers': {'Location': f"{frontend_url}?error=auth_failed"}}
+        
+        # If no code, just return 200 (health check)
+        return {'statusCode': 200, 'body': 'Lambda is running!'}
     
     try:
         # Get body data from frontend
         body = json.loads(event.get('body', '{}')) if isinstance(event.get('body'), str) else event.get('body', {})
         playlist_url = body.get('url')
-        auth_code = body.get('auth_code')
-        redirect_uri = body.get('redirect_uri')
+        token = body.get('token')
         
         if not playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'URL is missing!'})}
@@ -77,11 +101,9 @@ def handler(event, context):
         if 'spotify.com/playlist/' not in playlist_url:
             return {'statusCode': 400, 'body': json.dumps({'error': 'Invalid Spotify playlist URL. Please provide a valid playlist link.'})}
 
-        # Get Token (OAuth if auth_code provided, otherwise fallback to Client Credentials/Mock)
-        token = exchange_code(auth_code, redirect_uri) if auth_code else get_token()
-        
-        if auth_code and not token:
-            return {'statusCode': 401, 'body': json.dumps({'error': 'Spotify authorization failed or expired. Please login again.'})}
+        # Use the token passed from frontend, otherwise fallback to Client Credentials/Mock
+        if not token:
+            token = get_token()
         
         if token:
             # REAL MODE: Pull playlist songs from Spotify
