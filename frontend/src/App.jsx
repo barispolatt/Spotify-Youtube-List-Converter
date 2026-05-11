@@ -426,7 +426,6 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div className="grid-overlay"></div>
 
       {/* Floating particles */}
       <div className="particles">
